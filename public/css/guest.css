@@ -1,0 +1,39 @@
+/* Catalog Styles */
+.catalog-header { margin-bottom: 25px; }
+.catalog-header h2 { color: var(--sidebar-bg); margin-bottom: 5px; }
+.catalog-header p { color: #64748b; font-size: 0.9rem; }
+
+.resource-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.resource-table th {
+    text-align: left;
+    padding: 12px 15px;
+    background: #f8fafc;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.resource-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    color: var(--text-main);
+}
+
+.bold-text { font-weight: 600; color: #1e293b; }
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-badge.available { background: #dcfce7; color: #15803d; }
+.status-badge.occupied { background: #fee2e2; color: #b91c1c; }
+.status-badge.maintenance { background: #fef9c3; color: #a16207; }

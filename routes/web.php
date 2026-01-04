@@ -74,8 +74,22 @@ Route::get('/test-all-roles', function () {
 
 
 // here we have to put the guest routes (inside the prefixe)
-Route::prefix('guest')->middleware(['auth', 'role:invité'])->group(function () {
-    // it has to be completed
+//Route::prefix('guest')->middleware(['auth', 'role:invité'])->group(function () {
+Route::prefix('guest')->group(function () {
+    // 1. View available resources (Read-only)
+    Route::get('/resources', [App\Http\Controllers\GuestController::class, 'index'])
+        ->name('guest.resources');
+
+    // 2. View usage policies
+    Route::get('/policies', [App\Http\Controllers\GuestController::class, 'policies'])
+        ->name('guest.policies');
+
+    // 3. Submit account registration request (Form and Post)
+    Route::get('/register-request', [App\Http\Controllers\GuestController::class, 'showRegisterForm'])
+        ->name('guest.register.show');
+
+    Route::post('/register-request', [App\Http\Controllers\GuestController::class, 'submitRegisterRequest'])
+        ->name('guest.register.submit');
     // u gonna write the guest routes here
 });
 
