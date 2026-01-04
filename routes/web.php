@@ -53,3 +53,8 @@ Route::get('/test-all-roles', function () {
 
     return $output;
 });
+
+// Define the home page route again
+Route::get('/', function () {
+    return view('test'); 
+});
