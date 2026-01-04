@@ -4,7 +4,7 @@
 
 {{-- Push the guest CSS to the layout --}}
 @push('extra-css')
-    <link rel="stylesheet" href="{{ asset('css/guest.css') }}">
+    @vite(['resources/css/guest.css'])
 @endpush
 
 @section('content')

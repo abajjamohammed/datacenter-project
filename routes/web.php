@@ -5,6 +5,7 @@ use App\Http\Controllers\ReservationController;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Gate;
+use App\Http\Controllers\AuthController;
 
 // !!!!!!!!!
 //NB: when we split the users, every1 should write his user routes in his specific prefix
@@ -20,6 +21,11 @@ Route::get('/', function () {
 // TODO: add authentication routes after the creation of AuthController
 //dont forgt to use App\Http\Controllers\AuthController;
 
+// This displays the form
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+
+// This handles the "Sign Up" button click
+Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 
 // Routes that require authentication
 Route::middleware(['auth'])->group(function () {
@@ -74,8 +80,7 @@ Route::get('/test-all-roles', function () {
 
 
 // here we have to put the guest routes (inside the prefixe)
-//Route::prefix('guest')->middleware(['auth', 'role:invité'])->group(function () {
-Route::prefix('guest')->group(function () {
+Route::prefix('guest')->middleware(['auth', 'role:invité'])->group(function () {
     // 1. View available resources (Read-only)
     Route::get('/resources', [App\Http\Controllers\GuestController::class, 'index'])
         ->name('guest.resources');
@@ -119,3 +124,18 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 Route::get('/', function () {
     return view('test'); 
 });
+
+// Show Login Page
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
+// The POST route for when the user clicks 'Sign in'
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
+
+//Route for when user clicks create account
+Route::get('/register', function () {
+    return view('auth.register'); // You'll create this blade file next
+})->name('register');
+
+Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');

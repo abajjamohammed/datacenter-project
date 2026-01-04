@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlphaFold DataCenter - @yield('title')</title>
-    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+    @vite(['resources/css/layout.css'])
     @stack('extra-css')
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
@@ -64,10 +64,22 @@
                     <div class="notification-bell">
                         🔔<span class="bell-count">0</span>
                     </div>
-                    <div class="user-profile">
-                        <span class="user-role">Guest</span>
-                        <span class="user-name" id="guest-id-display">Guest Loading...</span>
-                    </div>
+                    
+                    @auth
+                        <div class="user-profile">
+                            <span class="badge">{{ Auth::user()->role->name }}</span>
+
+                            <div class="user-identity">
+                                <span class="welcome-text">Welcome,</span>
+                                <span class="username-display">{{ Auth::user()->name }}</span>
+                            </div>
+
+                            <form action="{{ route('logout') }}" method="POST" class="logout-form">
+                                @csrf
+                                <button type="submit" class="logout-link">Logout</button>
+                            </form>
+                        </div>
+                    @endauth
                 </div>
             </header>
 
@@ -96,16 +108,5 @@
             </footer>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Generate random 4-digit number
-            const randomNum = Math.floor(1000 + Math.random() * 9000);
-            const guestDisplay = document.getElementById('guest-id-display');
-            if (guestDisplay) {
-                guestDisplay.innerText = "Guest" + randomNum;
-            }
-        });
-    </script>
 </body>
 </html>
