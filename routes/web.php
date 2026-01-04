@@ -6,6 +6,21 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Gate;
 
+// !!!!!!!!!
+//NB: when we split the users, every1 should write his user routes in his specific prefix
+// !!!!!!!!!!!!!!!!!!!
+
+
+// Route for the home page, it was here the first idk why and who delete it 
+Route::get('/', function () {
+    return view('homepage');
+});
+
+
+// TODO: add authentication routes after the creation of AuthController
+//dont forgt to use App\Http\Controllers\AuthController;
+
+
 // Routes that require authentication
 Route::middleware(['auth'])->group(function () {
 
@@ -54,6 +69,38 @@ Route::get('/test-all-roles', function () {
     return $output;
 });
 
+
+
+
+
+// here we have to put the guest routes (inside the prefixe)
+Route::prefix('guest')->middleware(['auth', 'role:invité'])->group(function () {
+    // it has to be completed
+    // u gonna write the guest routes here
+});
+
+
+// Routes for the intern user
+Route::prefix('user')->middleware(['auth', 'role:utilisateur_interne'])->group(function () {
+      // it has to be completed
+    // u gonna write the user routes here
+});
+
+
+
+// Routes for the technical responsable
+Route::prefix('responsable')->middleware(['auth', 'role:responsable_technique'])->group(function () {
+     // it has to be completed
+    // u gonna write the responsable routes here
+});
+
+
+
+// Routes for admin
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
+    // it has to be completed
+    // u gonna write the admin routes here
+});
 // Define the home page route again
 Route::get('/', function () {
     return view('test'); 
