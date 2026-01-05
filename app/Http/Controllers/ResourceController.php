@@ -20,7 +20,7 @@ class ResourceController extends Controller
         })->get();
 
         // Return the view (we will create this next)
-        return view('catalog.index', compact('resources', 'search'));
+        return view('catalog', compact('resources', 'search'));
     }
 }
 

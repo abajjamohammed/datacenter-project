@@ -13,22 +13,9 @@ use App\Http\Controllers\GuestController;
 //NB: when we split the users, every1 should write his user routes in his specific prefix
 // !!!!!!!!!!!!!!!!!!!
 
-
-// Route for the home page, it was here the first idk why and who delete it 
-<?php
-
-use Illuminate\Support\Facades\Route;
-use App\Models\User;
-use App\Models\Role;
-use Illuminate\Support\Facades\Gate;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\ResourceController;
-use App\Http\Controllers\GuestController;
-
 // 1. PUBLIC ROUTES
 Route::get('/', function () {
-    return view('homepage'); // This matches your main dashboard
+    return view('layouts.app'); // This matches your main dashboard
 })->name('home');
 
 // Authentication Forms
