@@ -9,11 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+    //I added the description columns : mohammed 
     public function up(): void
     {
         Schema::create('roles', function (Blueprint $table) {
     $table->id();
     $table->string('name')->unique();
+    $table->text('description')->nullable();
     $table->timestamps();
 });
 

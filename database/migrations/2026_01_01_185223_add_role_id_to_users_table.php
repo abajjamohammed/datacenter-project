@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('role_id')->after('id')->nullable();
-            $table->foreign('role_id')->references('id')->on('roles')->onDelete('set null');
-        });
+            $table->unsignedBigInteger('role_id')->after('id'); //->nullable(); i removed nullable, bcs why its nullable! every user should have a role  :mohammed
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('restrict');  //('set null'); restrict is better, it doesnt allow to delete the role as long as there are users use this role   : mohammed   
+              });
     }
 
     /**

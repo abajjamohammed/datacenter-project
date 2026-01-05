@@ -17,9 +17,15 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            //i added profile, phone, department and is active columns  :mohammed
+            $table->enum('profile', ['ingénieur', 'enseignant', 'doctorant'])->nullable();
+            $table->string('phone')->nullable();
+            $table->string('department')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });
+
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
