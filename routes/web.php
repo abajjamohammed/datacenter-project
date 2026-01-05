@@ -1,11 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ReservationController;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\GuestController;
 
 // !!!!!!!!!
 //NB: when we split the users, every1 should write his user routes in his specific prefix
@@ -13,32 +15,63 @@ use App\Http\Controllers\AuthController;
 
 
 // Route for the home page, it was here the first idk why and who delete it 
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Models\User;
+use App\Models\Role;
+use Illuminate\Support\Facades\Gate;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\GuestController;
+
+// 1. PUBLIC ROUTES
 Route::get('/', function () {
-    return view('homepage');
-});
+    return view('homepage'); // This matches your main dashboard
+})->name('home');
 
+// Authentication Forms
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
 
-// TODO: add authentication routes after the creation of AuthController
-//dont forgt to use App\Http\Controllers\AuthController;
-
-// This displays the form
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 
-// This handles the "Sign Up" button click
+// Authentication Logic
+Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Routes that require authentication
+// 2. PROTECTED ROUTES (Require Login)
 Route::middleware(['auth'])->group(function () {
 
-    Route::post('/reservations', [ReservationController::class, 'store'])
-        ->name('reservations.store');
+    // Common Tools: Search & Catalog
+    Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');
 
-    Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve'])
-        ->name('reservations.approve');
+    // Guest Specific Routes
+    Route::prefix('guest')->middleware(['role:invité'])->group(function () {
+        Route::get('/resources', [GuestController::class, 'index'])->name('guest.resources');
+        Route::get('/policies', [GuestController::class, 'policies'])->name('guest.policies');
+        Route::get('/register-request', [GuestController::class, 'showRegisterForm'])->name('guest.register.show');
+        Route::post('/register-request', [GuestController::class, 'submitRegisterRequest'])->name('guest.register.submit');
+    });
 
+    // Internal User Specific Routes
+    Route::prefix('user')->middleware(['role:utilisateur_interne'])->group(function () {
+        Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+    });
+
+    Route::prefix('user')->middleware(['role:responsable_technique'])->group(function () {
+        Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+    });
+    // Admin Specific Routes
+    Route::prefix('admin')->middleware(['role:admin'])->group(function () {
+        Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve'])->name('reservations.approve');
+    });
 });
 
-// Route to test all roles and show their permissions
+// 3. TESTING UTILITIES
 Route::get('/test-all-roles', function () {
 
     $roles = Role::all();
@@ -75,67 +108,3 @@ Route::get('/test-all-roles', function () {
     return $output;
 });
 
-
-
-
-
-// here we have to put the guest routes (inside the prefixe)
-Route::prefix('guest')->middleware(['auth', 'role:invité'])->group(function () {
-    // 1. View available resources (Read-only)
-    Route::get('/resources', [App\Http\Controllers\GuestController::class, 'index'])
-        ->name('guest.resources');
-
-    // 2. View usage policies
-    Route::get('/policies', [App\Http\Controllers\GuestController::class, 'policies'])
-        ->name('guest.policies');
-
-    // 3. Submit account registration request (Form and Post)
-    Route::get('/register-request', [App\Http\Controllers\GuestController::class, 'showRegisterForm'])
-        ->name('guest.register.show');
-
-    Route::post('/register-request', [App\Http\Controllers\GuestController::class, 'submitRegisterRequest'])
-        ->name('guest.register.submit');
-    // u gonna write the guest routes here
-});
-
-
-// Routes for the intern user
-Route::prefix('user')->middleware(['auth', 'role:utilisateur_interne'])->group(function () {
-      // it has to be completed
-    // u gonna write the user routes here
-});
-
-
-
-// Routes for the technical responsable
-Route::prefix('responsable')->middleware(['auth', 'role:responsable_technique'])->group(function () {
-     // it has to be completed
-    // u gonna write the responsable routes here
-});
-
-
-
-// Routes for admin
-Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
-    // it has to be completed
-    // u gonna write the admin routes here
-});
-// Define the home page route again
-Route::get('/', function () {
-    return view('test'); 
-});
-
-// Show Login Page
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-// The POST route for when the user clicks 'Sign in'
-Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
-
-//Route for when user clicks create account
-Route::get('/register', function () {
-    return view('auth.register'); // You'll create this blade file next
-})->name('register');
-
-Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
