@@ -9,54 +9,96 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\GuestController;
 
-// !!!!!!!!!
-//NB: when we split the users, every1 should write his user routes in his specific prefix
-// !!!!!!!!!!!!!!!!!!!
 
 // 1. PUBLIC ROUTES
 Route::get('/', function () {
     return view('layouts.app'); // This matches your main dashboard
 })->name('home');
 
+
+// Common Tools: Search & Catalog 
+// mohamed: moved this from the middleware to outside here, because everyone can access it we dont have to securise it by the middleware
+Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');
+
+
 // Authentication Forms
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
+
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 
+//moved the acc request here bcs Must be PUBLIC so they can ask for an account
+Route::get('/register-request', [GuestController::class, 'showRegisterForm'])->name('guest.register.show');
+Route::post('/register-request', [GuestController::class, 'submitRegisterRequest'])->name('guest.register.submit');
+
+
 // Authentication Logic
+//Route::post('/login', [AuthController::class, 'login']);
+//Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+
 
 // 2. PROTECTED ROUTES (Require Login)
 Route::middleware(['auth'])->group(function () {
 
-    // Common Tools: Search & Catalog
-    Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');
+    // --- A. ROLE: INVITE (Logged in user with limited rights) ---
+    Route::prefix('guest')->middleware(['role:invite'])->group(function () {
+        // Dashboard (Required for Login Redirection)
+        Route::get('/dashboard', function () {
+            return view('Guest.dashboard');
+        })->name('guest.dashboard');
 
-    // Guest Specific Routes
-    Route::prefix('guest')->middleware(['role:invité'])->group(function () {
+        // Other logged-in guest features 
         Route::get('/resources', [GuestController::class, 'index'])->name('guest.resources');
         Route::get('/policies', [GuestController::class, 'policies'])->name('guest.policies');
-        Route::get('/register-request', [GuestController::class, 'showRegisterForm'])->name('guest.register.show');
-        Route::post('/register-request', [GuestController::class, 'submitRegisterRequest'])->name('guest.register.submit');
     });
 
-    // Internal User Specific Routes
-    Route::prefix('user')->middleware(['role:utilisateur_interne'])->group(function () {
+
+    // --- B. ROLE: UTILISATEUR INTERNE ---
+    Route::prefix('my')->middleware(['role:utilisateur_interne'])->group(function () {  // changed from prefix user to prefix my  :mohammed 06/01
+        // Dashboard (Required for Login Redirection)
+        Route::get('/dashboard', function () {
+            return view('user.dashboard');
+        })->name('user.dashboard');
+
         Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
     });
 
-    Route::prefix('user')->middleware(['role:responsable_technique'])->group(function () {
-        Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+
+    // --- C. ROLE: RESPONSABLE TECHNIQUE ---
+    Route::prefix('manager')->middleware(['role:responsable_technique'])->group(function () {   // changed from user prefix to manager prefix  :mohammed 06/01
+        // Dashboard
+        Route::get('/dashboard', function () {
+            return view('manager.dashboard');
+        })->name('manager.dashboard');
+
+        Route::post('/reservations/approve', [ReservationController::class, 'approve'])->name('manager.reservations.approve');
+     // Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');  replaced it wth the previous line :mohammed
     });
-    // Admin Specific Routes
+
+
+    // --- D. ROLE: ADMIN ---
     Route::prefix('admin')->middleware(['role:admin'])->group(function () {
+        // Dashboard
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
+
         Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve'])->name('reservations.approve');
     });
+
+
 });
+ 
+
+
+
 
 // 3. TESTING UTILITIES
 Route::get('/test-all-roles', function () {
@@ -94,4 +136,3 @@ Route::get('/test-all-roles', function () {
 
     return $output;
 });
-

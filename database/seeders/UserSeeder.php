@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Super Admin',
             'email' => 'admin@datacenter.com',
-            'password' => Hash::make('password'), // Mot de passe : password
+            'password' => Hash::make('12345'), // Mot de passe : password
             'role_id' => $role_admin->id,
             'is_active' => true,
         ]);
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Responsable IT',
             'email' => 'manager@datacenter.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('12345'),
             'role_id' => $role_manager->id,
             'department' => 'Infrastructure',
             'phone' => '0612345678',
@@ -48,7 +48,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Etudiant Test',
             'email' => 'user@datacenter.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('12345'),
             'role_id' => $role_user->id,
             'profile' => 'ingenieur', // Sans accent
             'department' => 'Génie Logiciel',
@@ -59,7 +59,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Visiteur Externe',
             'email' => 'guest@datacenter.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('12345'),
             'role_id' => $role_guest->id,
             'is_active' => true,
         ]);
