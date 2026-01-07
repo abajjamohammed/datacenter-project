@@ -30,10 +30,12 @@
 
                 <div class="card-actions">
                     {{-- Role-based buttons --}}
-                    @if(Auth::user()->role->name === 'utilisateur_interne')
+                    
+                    @if(Auth::check() && Auth::user()->role->name === 'utilisateur_interne') 
                         <button class="btn-action btn-primary">Request Reservation</button>
-                    @else
+                    @else {{--i added Auth::check() &&(line33) to verify the connection and the mode lecture badge for the other cases (line38) --}}
                         {{-- Guest view --}}
+                        <span class="badge">Mode Lecture</span>
                         <a href="{{ route('guest.register.show') }}" class="btn-action btn-outline">Apply for Access</a>
                     @endif
                 </div>
