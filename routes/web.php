@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Models\Role;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReservationController;
@@ -12,10 +13,19 @@ use App\Http\Controllers\GuestController;
 
 // 1. PUBLIC ROUTES
 Route::get('/', function () {
-    return view('layouts.app'); // This matches your main dashboard
+    if (Auth::check()) {
+        $role = Auth::user()->role->name;
+
+        return match($role) {
+            'admin'                 => redirect()->route('admin.dashboard'),
+            'responsable_technique' => redirect()->route('manager.dashboard'),
+            'utilisateur_interne'   => redirect()->route('user.dashboard'),
+            'invite'                => redirect()->route('guest.dashboard'),
+            default                 => redirect()->route('catalog.index'),
+        };
+    }
+    return view('auth.login'); // If not logged in, show login
 })->name('home');
-
-
 // Common Tools: Search & Catalog 
 // mohamed: moved this from the middleware to outside here, because everyone can access it we dont have to securise it by the middleware
 Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');

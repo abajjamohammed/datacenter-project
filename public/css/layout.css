@@ -94,8 +94,13 @@ body {
 
 /* Search Bar */
 .header-search {
-    position: relative; background: #f1f5f9; border-radius: 8px;
-    padding: 6px 15px 6px 35px; width: 240px; /* Adjusted width */
+    position: relative; 
+    background: #f1f5f9; 
+    border-radius: 8px;
+    padding: 6px 15px 6px 35px; 
+    width: 100%;
+    max-width: 200px; /* Smaller default width to leave room for the name */
+    min-width: 100px;
 }
 
 .search-icon { 
@@ -112,10 +117,15 @@ body {
     width: 100%; 
     font-size: 0.85rem; }
 
-.header-right { 
-    display: flex; 
-    align-items: center; 
-    gap: 15px; }
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0; 
+    margin-left: auto;
+    max-width: 60%; /* Prevents it from taking over the whole header */
+    justify-content: flex-end;
+}
 
 .btn-primary-small {
     background: var(--primary-blue); 
@@ -151,15 +161,15 @@ body {
 }
 
 /* --- USER PROFILE SECTION --- */
-.user-profile { 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-    background: #f8fafc; 
-    padding: 4px 12px; 
-    border-radius: 10px;
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8fafc;
+    padding: 5px 12px;
+    border-radius: 12px;
     border: 1px solid #e2e8f0;
-    margin-left: 10px;
+    max-width: 350px; /* Limits the total width of the profile area */
 }
 
 .badge {
@@ -167,42 +177,43 @@ body {
     color: white;
     padding: 3px 8px;
     border-radius: 5px;
-    font-size: 0.65rem;
+    font-size: 0.6rem; /* Slightly smaller font for long role names */
     font-weight: 800;
     text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adds '...' if the name is truly too long */
 }
 
 .user-identity {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    line-height: 1.1;
+    flex-direction: column; /* Stacking saves massive space */
+    line-height: 1.2;
 }
 
 .welcome-text {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: #64748b;
-    font-weight: 500;
 }
 
 .username-display {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    color: var(--sidebar-bg);
+    color: #1e293b;
+    white-space: nowrap; /* Prevents name from breaking into two lines */
 }
 
 .logout-link {
-    background: #fee2e2; 
-    border: none;
-    color: var(--error-red);
-    cursor: pointer;
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 4px 8px;
-    border-radius: 4px;
+    background: #fee2e2;
+    color: #ef4444;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
     text-transform: uppercase;
-    transition: 0.2s;
-    margin-left: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
 .logout-link:hover {

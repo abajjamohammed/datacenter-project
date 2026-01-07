@@ -4,12 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlphaFold DataCenter - @yield('title')</title>
-    {{-- Vite directive loads your CSS files from resources/css --}}
-    @vite(['resources/css/layout.css', 'resources/css/catalog.css'])
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    {{-- Global Styles --}}
+    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
+    
+    {{-- Individual Page Styles (e.g. Guest or Manager Specific) --}}
+    @yield('styles')
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
+        {{-- Sidebar Section --}}
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo-sphere"></div>
@@ -20,8 +28,17 @@
                 <div class="nav-group">
                     <span class="nav-label">MAIN MENU</span>
                     <ul>
-                        <li><a href="{{ route('home') }}" class="{{ Request::is('/') ? 'active' : '' }}">Dashboard</a></li>
-                        <li><a href="{{ route('catalog.index') }}" class="{{ Request::is('catalog*') ? 'active' : '' }}">Resource Catalog</a></li>
+                        {{-- Fixed: Wildcard check keeps Dashboard active for all roles --}}
+                        <li>
+                            <a href="{{ route('home') }}" class="{{ Request::is('*/dashboard') || Request::is('dashboard') || Request::is('/') ? 'active' : '' }}">
+                                Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('catalog.index') }}" class="{{ Request::is('catalog*') ? 'active' : '' }}">
+                                Resource Catalog
+                            </a>
+                        </li>
                         <li><a href="#">Activity Logs</a></li>
                     </ul>
                 </div>
@@ -33,8 +50,12 @@
                             <li><a href="#">My Requests</a></li>
                             <li><a href="#">Reservation History</a></li>
                         @else
-                            {{-- This link appears for 'invité' users --}}
-                            <li><a href="{{ route('guest.register.show') }}" style="color: #0096FF; font-weight: 600;">Apply for Access</a></li>
+                            {{-- Specific style for Guests to Apply for Access --}}
+                            <li>
+                                <a href="{{ route('guest.register.show') }}" class="{{ Request::is('*/register-request') ? 'active' : '' }}" style="color: #0096FF; font-weight: 700;">
+                                    Apply for Access
+                                </a>
+                            </li>
                         @endif
                     </ul>
                 </div>
@@ -43,12 +64,17 @@
                     <span class="nav-label">SUPPORT</span>
                     <ul>
                         <li><a href="#">Report Technical Issue</a></li>
-                        <li><a href="{{ route('guest.policies') }}" class="{{ Request::is('guest/policies') ? 'active' : '' }}">Usage Policies</a></li>
+                        <li>
+                            <a href="{{ route('guest.policies') }}" class="{{ Request::is('*/policies') ? 'active' : '' }}">
+                                Usage Policies
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>
         </aside>
 
+        {{-- Main Page Content --}}
         <div class="main-wrapper">
             <header class="top-header">
                 <div class="header-left">
@@ -58,16 +84,13 @@
                         <span class="current-page">@yield('title', 'Dashboard')</span>
                     </nav>
                     
-                    {{-- Search form sends data to ResourceController@index --}}
                     <form action="{{ route('catalog.index') }}" method="GET" class="header-search">
                         <span class="search-icon">🔍</span>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search resources or specs...">
-                        <button type="submit" style="display:none;">Search</button> 
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search resources...">
                     </form>
                 </div>
 
                 <div class="header-right">
-                    {{-- Action button limited to internal users --}}
                     @if(Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
                         <button class="btn-primary-small">+ New Request</button>
                     @endif
@@ -77,6 +100,7 @@
                     </div>
                     
                     @auth
+                        {{-- User Profile: Flex container ensures space for logout --}}
                         <div class="user-profile">
                             <span class="badge">{{ Auth::user()->role->name }}</span>
 
@@ -85,7 +109,7 @@
                                 <span class="username-display">{{ Auth::user()->name }}</span>
                             </div>
 
-                            <form action="{{ route('logout') }}" method="POST" class="logout-form">
+                            <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
                                 @csrf
                                 <button type="submit" class="logout-link">Logout</button>
                             </form>
@@ -95,6 +119,7 @@
             </header>
 
             <main class="content-body">
+                {{-- This card mirrors the professional white background --}}
                 <div class="page-card">
                     @yield('content')
                 </div>
