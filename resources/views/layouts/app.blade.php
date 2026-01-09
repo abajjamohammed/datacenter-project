@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlphaFold DataCenter - @yield('title')</title>
-    
+
     {{-- Global Styles --}}
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
-    
+
     {{-- Individual Page Styles (e.g. Guest or Manager Specific) --}}
     @yield('styles')
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="app-container">
         {{-- Sidebar Section --}}
@@ -23,19 +25,21 @@
                 <div class="logo-sphere"></div>
                 <h1>AlphaFold DC</h1>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-group">
                     <span class="nav-label">MAIN MENU</span>
                     <ul>
                         {{-- Fixed: Wildcard check keeps Dashboard active for all roles --}}
                         <li>
-                            <a href="{{ route('home') }}" class="{{ Request::is('*/dashboard') || Request::is('dashboard') || Request::is('/') ? 'active' : '' }}">
+                            <a href="{{ route('home') }}"
+                                class="{{ Request::is('*/dashboard') || Request::is('dashboard') || Request::is('/') ? 'active' : '' }}">
                                 Dashboard
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('catalog.index') }}" class="{{ Request::is('catalog*') ? 'active' : '' }}">
+                            <a href="{{ route('catalog.index') }}"
+                                class="{{ Request::is('catalog*') ? 'active' : '' }}">
                                 Resource Catalog
                             </a>
                         </li>
@@ -46,13 +50,15 @@
                 <div class="nav-group">
                     <span class="nav-label">RESERVATIONS</span>
                     <ul>
-                        @if(Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
+                        @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
                             <li><a href="#">My Requests</a></li>
-                            <li><a href="#">Reservation History</a></li>
+                            <li><a href="{{ route('reservations.index') }}" class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation History</a></li>
                         @else
                             {{-- Specific style for Guests to Apply for Access --}}
                             <li>
-                                <a href="{{ route('guest.register.show') }}" class="{{ Request::is('*/register-request') ? 'active' : '' }}" style="color: #0096FF; font-weight: 700;">
+                                <a href="{{ route('guest.register.show') }}"
+                                    class="{{ Request::is('*/register-request') ? 'active' : '' }}"
+                                    style="color: #0096FF; font-weight: 700;">
                                     Apply for Access
                                 </a>
                             </li>
@@ -65,7 +71,8 @@
                     <ul>
                         <li><a href="#">Report Technical Issue</a></li>
                         <li>
-                            <a href="{{ route('guest.policies') }}" class="{{ Request::is('*/policies') ? 'active' : '' }}">
+                            <a href="{{ route('guest.policies') }}"
+                                class="{{ Request::is('*/policies') ? 'active' : '' }}">
                                 Usage Policies
                             </a>
                         </li>
@@ -83,22 +90,23 @@
                         <span class="crumb-divider">/</span>
                         <span class="current-page">@yield('title', 'Dashboard')</span>
                     </nav>
-                    
+
                     <form action="{{ route('catalog.index') }}" method="GET" class="header-search">
                         <span class="search-icon">🔍</span>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search resources...">
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            placeholder="Search resources...">
                     </form>
                 </div>
 
                 <div class="header-right">
-                    @if(Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
-                        <button class="btn-primary-small">+ New Request</button>
+                    @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
+                        <a href="{{ route('catalog.index') }}" class="btn-primary-small" style="text-decoration: none;">+ New Reservation</a>
                     @endif
-                    
+
                     <div class="notification-bell">
                         🔔<span class="bell-count">0</span>
                     </div>
-                    
+
                     @auth
                         {{-- User Profile: Flex container ensures space for logout --}}
                         <div class="user-profile">
@@ -133,4 +141,5 @@
         </div>
     </div>
 </body>
+
 </html>
