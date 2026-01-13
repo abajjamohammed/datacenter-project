@@ -73,9 +73,10 @@ Route::middleware(['auth'])->group(function () {
     // --- B. ROLE: UTILISATEUR INTERNE ---  
     Route::prefix('my')->middleware(['role:utilisateur_interne'])->group(function () {  // changed from prefix user to prefix my  :mohammed 06/01
         // Dashboard (Required for Login Redirection)
-        Route::get('/dashboard', function () {
-            return view('user.dashboard');
-        })->name('user.dashboard');
+        //   Route::get('/dashboard', function () {
+        //       return view('user.dashboard');
+        //   })->name('user.dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index'])->name('user.dashboard');
 
         // See all my reservations  :mohammed 08/01
         Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
@@ -88,6 +89,10 @@ Route::middleware(['auth'])->group(function () {
 
         // CANCEL: Delete a pending reservation
         Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+
+        //INCIDENTS: Report a technical issue
+        Route::get('/incidents/report', [\App\Http\Controllers\UserIncidentController::class, 'create'])->name('incidents.create');
+        Route::post('/incidents', [\App\Http\Controllers\UserIncidentController::class, 'store'])->name('incidents.store');
     });
 
 

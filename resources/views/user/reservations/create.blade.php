@@ -1,10 +1,11 @@
 @extends('layouts.app')
 {{--created by mohammed 09/01--}}
+{{--this is the reservation form--}}
 @section('title', 'New Reservation')
 
 @section('styles')
     {{-- im using the filter css bcs it has nice input styles (.filter-input) --}}
-    <link rel="stylesheet" href="{{ asset('css/filtre.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/user.css') }}">
     <link rel="stylesheet" href="{{ asset('dashboardcss/guestboard.css') }}">
 @endsection
 

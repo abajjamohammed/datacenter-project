@@ -1,9 +1,9 @@
 @extends('layouts.app')
-
+{{--this is the reservation history page. created by mohammed--}}
 @section('title', 'My Reservations')
 
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('css/filtre.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/user.css') }}">
 @endsection
 
 @section('content')
@@ -13,8 +13,7 @@
                 <h1>Reservation <span>History</span></h1> <br>
                 <p class="subtitle">Track the status of your resource requests.</p> <br>
             </div>
-            <a href="{{ route('catalog.index') }}" class="btn-primary-small" style="text-decoration: none;">+ New
-                Reservation</a>
+            <a href="{{ route('catalog.index') }}" class="btn-primary-small" style="text-decoration: none;">+ New Reservation</a>
         </div>
 
         {{-- Filter Section --}}

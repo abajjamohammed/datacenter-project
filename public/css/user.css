@@ -237,3 +237,150 @@ option[value="finished"] {
     color: #b91c1c;
     text-decoration: underline;
 }
+
+
+
+/* --- Dashboard Specific Styles --- */
+
+/* 1. Stats Grid */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 20px;
+}
+
+.stat-value {
+    font-size: 3rem;
+    margin: 10px 0;
+    font-weight: 800;
+}
+
+/* Color Modifiers for Stats */
+.stat-pending .card-accent-line {
+    background: #f59e0b;
+}
+
+.stat-pending .stat-value {
+    color: #f59e0b;
+}
+
+.stat-approved .card-accent-line {
+    background: #10b981;
+}
+
+.stat-approved .stat-value {
+    color: #10b981;
+}
+
+.stat-total .card-accent-line {
+    background: #0096FF;
+}
+
+.stat-total .stat-value {
+    color: #0096FF;
+}
+
+/* 2. Main Dashboard Layout (Activity vs Widget) */
+.dashboard-main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    /* Activity takes 2/3, Widget takes 1/3 */
+    gap: 30px;
+}
+
+/* 3. Activity List Styling */
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-name {
+    color: #334155;
+    display: block;
+    font-weight: 700;
+}
+
+.activity-time {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.view-all-link {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.view-all-link a {
+    color: #0096FF;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* 4. "Next Up" Widget Special Styling */
+.card-next-up {
+    background: #f8fbff;
+    border-color: #0096FF;
+}
+
+.next-up-title {
+    color: #0096FF;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.next-up-resource {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #1e293b;
+}
+
+/* Responsive adjustment for mobile */
+@media (max-width: 900px) {
+    .dashboard-main-grid {
+        grid-template-columns: 1fr;
+        /* Stack them on small screens */
+    }
+}
+
+/*for the priority in incident's form */
+/* --- Priority Dropdown Colors --- */
+/* Low Priority -> Green */
+option[value="basse"] {
+    color: #166534;
+    font-weight: 600;
+}
+
+/* Medium Priority -> Orange/Mustard */
+option[value="moyenne"] {
+    color: #d97706;
+    font-weight: 600;
+}
+
+/* High Priority -> Red */
+option[value="haute"] {
+    color: #dc2626;
+    font-weight: 700;
+}

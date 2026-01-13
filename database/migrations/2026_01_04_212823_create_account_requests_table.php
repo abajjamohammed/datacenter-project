@@ -12,7 +12,8 @@ return new class extends Migration
         Schema::create('account_requests', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email'); 
+            $table->string('email')->unique(); 
+            $table->string('password');
             $table->string('phone')->nullable();
             $table->string('department')->nullable();
             $table->enum('profile', ['ingénieur', 'enseignant', 'doctorant']);  // Profil it can be (ingénieur, enseignant, doctorant)

@@ -52,7 +52,9 @@
                     <ul>
                         @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
                             <li><a href="#">My Requests</a></li>
-                            <li><a href="{{ route('reservations.index') }}" class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation History</a></li>
+                            <li><a href="{{ route('reservations.index') }}"
+                                    class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
+                                    History</a></li>
                         @else
                             {{-- Specific style for Guests to Apply for Access --}}
                             <li>
@@ -69,12 +71,13 @@
                 <div class="nav-group">
                     <span class="nav-label">SUPPORT</span>
                     <ul>
-                        <li><a href="#">Report Technical Issue</a></li>
+                        <li>
+                            <a href="{{ route('incidents.create') }}" class="{{ Request::routeIs('incidents.create') ? 'active' : '' }}">
+                                Report Technical Issue</a>
+                        </li>
                         <li>
                             <a href="{{ route('guest.policies') }}"
-                                class="{{ Request::is('*/policies') ? 'active' : '' }}">
-                                Usage Policies
-                            </a>
+                                class="{{ Request::is('*/policies') ? 'active' : '' }}">Usage Policies</a>
                         </li>
                     </ul>
                 </div>
@@ -99,13 +102,10 @@
                 </div>
 
                 <div class="header-right">
-                    @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
-                        <a href="{{ route('catalog.index') }}" class="btn-primary-small" style="text-decoration: none;">+ New Reservation</a>
-                    @endif
 
                     <div class="notification-bell">
                         🔔<span class="bell-count">0</span>
-                    </div>
+                   </div>
 
                     @auth
                         {{-- User Profile: Flex container ensures space for logout --}}
