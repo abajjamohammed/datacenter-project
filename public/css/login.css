@@ -119,7 +119,7 @@ h2 {
 }
 
 .btn-signin, 
-.btn-create {
+.btn-guest {
     flex: 1;
     padding: 16px;
     border-radius: 15px;
@@ -152,14 +152,14 @@ h2 {
     transform: translateY(-2px); 
 }
 
-.btn-create {
+.btn-guest{
     background-color: transparent;
     color: #0096FF;
     border: 2px solid #0096FF;
     box-sizing: border-box;
 }
 
-.btn-create:hover { 
+.btn-guest:hover { 
     background-color: rgba(0, 150, 255, 0.05); 
     transform: translateY(-2px); 
 }

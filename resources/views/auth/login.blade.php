@@ -71,7 +71,7 @@
 
         <div class="button-group">
             <button type="submit" class="btn-signin">Sign in</button>
-            <a href="{{ route('register') }}" class="btn-create">Create Account</a>
+            <a href="{{ route('guest.dashboard') }}" class="btn-guest">Open as Guest</a>
         </div>
     </form>
 </div>
