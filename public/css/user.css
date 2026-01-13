@@ -384,3 +384,13 @@ option[value="haute"] {
     color: #dc2626;
     font-weight: 700;
 }
+
+/* for the reservation link in incident's form */
+.reservation-incid {
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #bfdbfe;
+}

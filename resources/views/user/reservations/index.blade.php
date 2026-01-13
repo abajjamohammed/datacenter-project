@@ -1,5 +1,5 @@
 @extends('layouts.app')
-{{--this is the reservation history page. created by mohammed--}}
+{{-- this is the reservation history page. created by mohammed --}}
 @section('title', 'My Reservations')
 
 @section('styles')
@@ -13,7 +13,8 @@
                 <h1>Reservation <span>History</span></h1> <br>
                 <p class="subtitle">Track the status of your resource requests.</p> <br>
             </div>
-            <a href="{{ route('catalog.index') }}" class="btn-primary-small" style="text-decoration: none;">+ New Reservation</a>
+            <a href="{{ route('catalog.index') }}" class="btn-primary-small" style="text-decoration: none;">+ New
+                Reservation</a>
         </div>
 
         {{-- Filter Section --}}
@@ -94,10 +95,11 @@
                                     {{-- Logic to choose the right badge color --}}
                                     @php
                                         $statusClass = match ($reservation->reservation_status) {
-                                            'approved' => 'status-available', // Green
-                                            'rejected' => 'status-unavailable', // Red
-                                            'finished' => 'status-badge', // Grey/Default
-                                            default => 'status-maintenance', // Yellow (for Pending)
+                                            'approuvée' => 'status-available', // Green
+                                            'active' => 'status-available', // Green
+                                            'refusée' => 'status-unavailable', // Red
+                                            'terminée' => 'status-badge', // Grey
+                                            default => 'status-maintenance', // Yellow (En attente)
                                         };
 
                                         // Make the text prettier (e.g., 'en_attente' -> 'En Attente')
@@ -109,21 +111,28 @@
                                     </span>
                                 </td>
                                 <td>
-                                    {{-- We can add a "Cancel" button here later if status is Pending --}}
-                                    @if ($reservation->reservation_status === 'en_attente')
-                                        <form action="{{ route('reservations.destroy', $reservation->id) }}" method="POST"
-                                            style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            {{-- Javascript confirm to prevent accidental clicks --}}
-                                            <button type="submit" class="btn-cancel"
-                                                onclick="return confirm('Are you sure you want to cancel this request?');">
-                                                Cancel
-                                            </button>
-                                        </form>
-                                    @else
-                                        <span style="color: #cbd5e1;">-</span>
-                                    @endif
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+
+                                        {{-- 1. Cancel Button (Only if Pending) --}}
+                                        @if ($reservation->reservation_status === 'en_attente')
+                                            <form action="{{ route('reservations.destroy', $reservation->id) }}"
+                                                method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn-cancel"
+                                                    onclick="return confirm('Are you sure?');">Cancel</button>
+                                            </form>
+                                        @endif
+
+                                        {{-- 2. Report Issue Button (Only if Approved, Active, or Finished) --}}
+                                        {{-- It doesn't make sense to report an incident on a Rejected or Pending request --}}
+                                        @if (in_array($reservation->reservation_status, ['approved', 'active', 'finished', 'approuvée', 'terminée']))
+                                            <a href="{{ route('incidents.create', ['reservation_id' => $reservation->id]) }}"
+                                                title="Report Technical Issue"
+                                                style="text-decoration: none; font-size: 1.2rem; cursor: pointer;">⚠️</a>
+                                        @endif
+
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

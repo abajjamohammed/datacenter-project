@@ -79,7 +79,7 @@ class ReservationController extends Controller
         // CHECK AVAILABILITY 
         // Check if there is an overlapping APPROVED reservation
         $conflict = Reservation::where('resource_id', $validated['resource_id'])
-            ->where('reservation_status', 'approved') // We check against approved bookings
+            ->whereIn('reservation_status', ['approuvée', 'active'])  // We check against approved bookings
             ->where(function ($query) use ($validated) {
                 // Overlap logic: Start A < End B  AND  End A > Start B
                 $query->where('start_date', '<', $validated['end_date'])

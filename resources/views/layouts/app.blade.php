@@ -43,7 +43,9 @@
                                 Resource Catalog
                             </a>
                         </li>
+                        @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
                         <li><a href="#">Activity Logs</a></li>
+                        @endif
                     </ul>
                 </div>
 
@@ -51,7 +53,7 @@
                     <span class="nav-label">RESERVATIONS</span>
                     <ul>
                         @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
-                            <li><a href="#">My Requests</a></li>
+                          {{--  <li><a href="#">My Requests</a></li> --}}
                             <li><a href="{{ route('reservations.index') }}"
                                     class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
                                     History</a></li>
