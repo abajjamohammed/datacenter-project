@@ -43,7 +43,7 @@
                                 Resource Catalog
                             </a>
                         </li>
-                        @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
+                        @if (Auth::check() && Auth::user()->role->name === 'admin')
                         <li><a href="#">Activity Logs</a></li>
                         @endif
                     </ul>
