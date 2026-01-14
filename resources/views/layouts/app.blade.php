@@ -164,7 +164,8 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#">
+                                {{-- UPDATED LINK HERE --}}
+                                <a href="{{ route('admin.logs.index') }}" class="{{ Request::is('admin/logs*') ? 'active' : '' }}">
                                     <i class="fas fa-history" style="width:20px; text-align:center; margin-right:8px;"></i> Global Logs
                                 </a>
                             </li>

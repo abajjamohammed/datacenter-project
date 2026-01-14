@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Resource;
 use App\Models\ResourceCategory;
 use App\Models\User;
+use App\Models\ActivityLog; // <--- IMPERATIVE: Import the ActivityLog model
 use Illuminate\Http\Request;
 
 class AdminResourceController extends Controller
@@ -29,7 +30,6 @@ class AdminResourceController extends Controller
     public function create()
     {
         $categories = ResourceCategory::all();
-        // Get users who are 'responsable_technique' to assign as managers
         $managers = User::whereHas('role', function($q) {
             $q->where('name', 'responsable_technique');
         })->get();
@@ -37,7 +37,7 @@ class AdminResourceController extends Controller
         return view('admin.resources.create', compact('categories', 'managers'));
     }
 
-    // 3. STORE NEW RESOURCE
+    // 3. STORE NEW RESOURCE (With Logging)
     public function store(Request $request)
     {
         $request->validate([
@@ -46,14 +46,12 @@ class AdminResourceController extends Controller
             'location' => 'required|string|max:255',
             'description' => 'required|string',
             'responsable_id' => 'nullable|exists:users,id',
-            // Technical Specs Validation
             'cpu' => 'nullable|string',
             'ram' => 'nullable|string',
             'storage' => 'nullable|string',
             'os' => 'nullable|string',
         ]);
 
-        // Merge individual inputs into the JSON 'specifications' array
         $specs = [
             'CPU' => $request->cpu,
             'RAM' => $request->ram,
@@ -62,16 +60,20 @@ class AdminResourceController extends Controller
             'Other' => $request->other_specs
         ];
 
-        Resource::create([
+        // Create the resource and assign it to a variable
+        $resource = Resource::create([
             'name' => $request->name,
             'category_id' => $request->category_id,
             'location' => $request->location,
             'description' => $request->description,
             'responsable_id' => $request->responsable_id,
-            'specifications' => $specs, // Eloquent casts this to JSON automatically
+            'specifications' => $specs,
             'resource_status' => 'disponible',
             'is_active' => true,
         ]);
+
+        // LOG THE ACTION
+        ActivityLog::record('Created Resource', "Added new resource: {$resource->name}", $resource);
 
         return redirect()->route('admin.resources.index')->with('success', 'Resource created successfully.');
     }
@@ -88,7 +90,7 @@ class AdminResourceController extends Controller
         return view('admin.resources.edit', compact('resource', 'categories', 'managers'));
     }
 
-    // 5. UPDATE RESOURCE
+    // 5. UPDATE RESOURCE (With Logging)
     public function update(Request $request, $id)
     {
         $resource = Resource::findOrFail($id);
@@ -101,7 +103,6 @@ class AdminResourceController extends Controller
             'responsable_id' => 'nullable|exists:users,id',
         ]);
 
-        // Update specs array
         $specs = [
             'CPU' => $request->cpu,
             'RAM' => $request->ram,
@@ -119,25 +120,38 @@ class AdminResourceController extends Controller
             'specifications' => $specs,
         ]);
 
+        // LOG THE ACTION
+        ActivityLog::record('Updated Resource', "Updated details for resource: {$resource->name}", $resource);
+
         return redirect()->route('admin.resources.index')->with('success', 'Resource updated successfully.');
     }
 
-    // 6. TOGGLE STATUS
+    // 6. TOGGLE STATUS (With Logging)
     public function toggleStatus($id)
     {
         $resource = Resource::findOrFail($id);
         $resource->is_active = !$resource->is_active;
-        // If deactivated, force status to 'hors_service'
         $resource->resource_status = $resource->is_active ? 'disponible' : 'hors_service';
         $resource->save();
+
+        // LOG THE ACTION
+        $status = $resource->is_active ? 'Activated' : 'Deactivated';
+        ActivityLog::record('Resource Status', "Resource {$resource->name} was {$status}", $resource);
+
         return back()->with('success', 'Resource status updated.');
     }
 
-    // 7. DELETE RESOURCE
+    // 7. DELETE RESOURCE (With Logging)
     public function destroy($id)
     {
         $resource = Resource::findOrFail($id);
+        $name = $resource->name; // Capture name before deletion
+        
         $resource->delete();
+
+        // LOG THE ACTION
+        ActivityLog::record('Deleted Resource', "Permanently removed resource: {$name}");
+
         return back()->with('success', 'Resource deleted successfully.');
     }
 }
