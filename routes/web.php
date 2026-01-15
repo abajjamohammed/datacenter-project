@@ -16,7 +16,7 @@ Route::get('/', function () {
     if (Auth::check()) {
         $role = Auth::user()->role->name;
 
-        return match($role) {
+        return match ($role) {
             'admin'                 => redirect()->route('admin.dashboard'),
             'responsable_technique' => redirect()->route('manager.dashboard'),
             'utilisateur_interne'   => redirect()->route('user.dashboard'),
@@ -74,15 +74,32 @@ Route::middleware(['auth'])->group(function () {
         return "Activity Logs Page - Coming Soon";
     })->name('activity.logs');
 
-    // --- B. ROLE: UTILISATEUR INTERNE ---
+    // --- B. ROLE: UTILISATEUR INTERNE ---  
     Route::prefix('my')->middleware(['role:utilisateur_interne'])->group(function () {  // changed from prefix user to prefix my  :mohammed 06/01
         // Dashboard (Required for Login Redirection)
-        Route::get('/dashboard', function () {
-            return view('user.dashboard');
-        })->name('user.dashboard');
+        //   Route::get('/dashboard', function () {
+        //       return view('user.dashboard');
+        //   })->name('user.dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index'])->name('user.dashboard');
+
+        // See all my reservations  :mohammed 08/01
+        Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+
+        // CREATE: Submit a new reservation   :mohammed 08/01
+        Route::get('/reservations/create/{resource}', [ReservationController::class, 'create'])->name('reservations.create');
+
 
         Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+
+        // CANCEL: Delete a pending reservation
+        Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+
+        //INCIDENTS: Report a technical issue
+        Route::get('/incidents/report', [\App\Http\Controllers\UserIncidentController::class, 'create'])->name('incidents.create');
+        Route::post('/incidents', [\App\Http\Controllers\UserIncidentController::class, 'store'])->name('incidents.store');
     });
+
+
 
 
     // --- C. ROLE: RESPONSABLE TECHNIQUE ---
@@ -93,7 +110,7 @@ Route::middleware(['auth'])->group(function () {
         })->name('manager.dashboard');
 
         Route::post('/reservations/approve', [ReservationController::class, 'approve'])->name('manager.reservations.approve');
-     // Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');  replaced it wth the previous line :mohammed
+        // Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');  replaced it wth the previous line :mohammed
     });
 
 
@@ -106,10 +123,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve'])->name('reservations.approve');
     });
-
-
 });
- 
+
 
 
 

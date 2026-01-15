@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('reservation_status', ['en_attente', 'approuvée', 'refusée', 'active', 'terminée'])
                   ->default('en_attente');        // changed ['Pending', 'Approved', 'Rejected', 'Active', 'Completed']  :mohammed
             $table->text('justification'); //->nullable(); // changed the type from string and removed nullable :mohammed
-            $table->foreignId('approved_by')->references('id')->on('users')->nullable();
+            $table->foreignId('approved_by')->nullable()->constrained('users');
             $table->text('approval_comment')->nullable(); // approval/rejection reason :mohammed
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
