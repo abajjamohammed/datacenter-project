@@ -14,7 +14,8 @@ use App\Http\Controllers\AdminResourceController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminMaintenanceController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\AdminLogController; // Added Log Controller
+use App\Http\Controllers\AdminLogController;
+use App\Http\Controllers\AdminAccountRequestController;
 
 // ==========================================
 // 1. PUBLIC ROUTES (No Login Required)
@@ -37,17 +38,18 @@ Route::get('/', function () {
 // Common Tools
 Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');
 
-// Auth Views
+// Auth Views & Logic
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-
-// Guest Account Request
-Route::get('/register-request', [GuestController::class, 'showRegisterForm'])->name('guest.register.show');
-Route::post('/register-request', [GuestController::class, 'submitRegisterRequest'])->name('guest.register.submit');
-
-// Auth Logic
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Standard Registration (Direct Account Creation)
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.store'); // <--- FIXED: ADDED THIS
+
+// Guest Account Request (For Admin Approval Workflow)
+Route::get('/register-request', [GuestController::class, 'showRegisterForm'])->name('guest.register.show');
+Route::post('/register-request', [GuestController::class, 'submitRegisterRequest'])->name('guest.register.submit');
 
 
 // ==========================================
@@ -103,6 +105,10 @@ Route::middleware(['auth'])->group(function () {
 
         // 6. Reservation Actions
         Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve'])->name('reservations.approve');
+
+        // 7. Account Request Actions
+        Route::post('/account-requests/{id}/approve', [AdminAccountRequestController::class, 'approve'])->name('admin.accounts.approve');
+        Route::post('/account-requests/{id}/reject', [AdminAccountRequestController::class, 'reject'])->name('admin.accounts.reject');
     });
 
 }); 
