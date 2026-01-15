@@ -14,13 +14,19 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-soft-blue);
     color: var(--text-main);
-    height: 100vh;
+    min-height: 100vh; /* Changed from height: 100vh */
     width: 100vw;
-    overflow: hidden; 
+    overflow-x: hidden; /* Prevent horizontal side-scrolling */
+    overflow-y: auto;  /* Allow vertical scrolling */
+    height: auto; 
 }
 
-.app-container { display: flex; height: 100vh; width: 100vw; }
-
+.app-container { 
+    display: flex; 
+    align-items: flex-start; /* Important for sticky behavior */
+    min-height: 100vh; 
+    width: 100vw; 
+}
 /* Sidebar Styling */
 .sidebar {
     width: 260px;
@@ -29,6 +35,11 @@ body {
     display: flex;
     flex-direction: column;
     flex-shrink: 0; 
+    
+    /* ADD THESE 3 LINES */
+    position: sticky; 
+    top: 0;
+    height: 100vh; /* Keeps it exactly the height of the screen */
 }
 
 .sidebar-header {
@@ -69,10 +80,10 @@ body {
     flex-grow: 1; 
     display: flex; 
     flex-direction: column; 
-    height: 100vh;
-    overflow: hidden; 
+    min-height: 100vh; /* Changed from height: 100vh */
+    width: calc(100vw - 260px); /* Account for sidebar width */
+    overflow: visible;  /* Let content flow naturally */
 }
-
 /* Header Styling */
 .top-header {
     height: 70px; 
@@ -88,7 +99,7 @@ body {
 .header-left { display: flex; align-items: center; gap: 35px; }
 
 .breadcrumbs { font-size: 0.9rem; color: #64748b; white-space: nowrap; }
-.breadcrumbs a { text-decoration: none; color: var(--primary-blue); font-weight: 600; }
+.breadcrumb-static { color: #0084ff; cursor: default; }
 .crumb-divider { margin: 0 10px; color: #cbd5e1; }
 .current-page { color: #1e293b; font-weight: 500; }
 
@@ -223,37 +234,118 @@ body {
 
 /* Content Body */
 .content-body { 
-    flex-grow: 1; 
-    padding: 25px; 
-    overflow-y: auto; }
+    flex: 1 0 auto; /* Add this property */
+    padding: 25px;
+}
 .page-card { 
     background: var(--white); 
     border-radius: 16px; 
     padding: 25px; 
-    min-height: 100%;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    height: auto; /* Remove min-height: 100% */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+}
 
 /* Footer */
+/* =========================================
+   ALPHAFOLD DC - FINALIZED FOOTER CSS
+   ========================================= */
+
 .main-footer {
-    height: 50px; 
-    background: var(--sidebar-bg); 
     display: flex;
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 0 30px;
-    color: #94a3b8; 
-    font-size: 0.8rem; 
-    flex-shrink: 0;
+    justify-content: space-between; /* Pushes sections to extreme ends */
+    align-items: center;
+    padding: 25px 40px; /* Balanced spacing */
+    background: #0b1120; /* Deep navy professional background */
+    color: #94a3b8;
+    border-top: 1px solid #1e293b;
+    width: 100%;
+    box-sizing: border-box; /* Prevents horizontal overflow */
+    margin-top: auto;
 }
-.footer-section span { 
-    color: var(--primary-blue); 
+
+/* Left Section - Copyright & Address */
+.footer-section.left {
+    flex: 1; /* Standard size */
+    text-align: left;
+}
+
+.footer-section.left strong {
+    color: #f8fafc;
+}
+
+.location-text {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 4px;
+    display: block;
+}
+
+/* Center Section - Navigation Links */
+.footer-section.center {
+    flex: 2; /* Larger flex value to maintain true center */
+    display: flex;
+    justify-content: center;
+}
+
+.footer-links {
+    list-style: none;
+    display: flex;
+    gap: 40px; /* Professional spacing */
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.footer-links a, 
+.contact-info {
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: #cbd5e1;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #38bdf8; /* Signature Blue highlight */
+}
+
+/* Right Section - Technical Tag */
+.footer-section.right {
+    flex: 1;
+    text-align: right;
+}
+
+.version-tag {
+    background: rgba(56, 189, 248, 0.08); /* Subtle blue glow */
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace; /* Scientific look */
+    font-size: 0.72rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
 }
-.footer-links a { 
-    color: #cbd5e1; 
-    text-decoration: none; 
+
+/* Responsive Logic - Stack on Mobile */
+@media (max-width: 992px) {
+    .main-footer {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+        padding: 30px 20px;
+    }
+    .footer-section.left, 
+    .footer-section.center, 
+    .footer-section.right {
+        text-align: center;
+        flex: none;
+        width: 100%;
+    }
+    .footer-links {
+        flex-direction: column;
+        gap: 12px;
+    }
 }
-.separator { 
-    margin: 0 8px; 
-    color: #475569; 
-}
+

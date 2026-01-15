@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     //created by mohammed 04/01
-    public function up(): void
+public function up(): void
     {
         Schema::create('account_requests', function (Blueprint $table) {
             $table->id();

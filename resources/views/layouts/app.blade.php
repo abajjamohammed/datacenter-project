@@ -30,7 +30,6 @@
                 <div class="nav-group">
                     <span class="nav-label">MAIN MENU</span>
                     <ul>
-                        {{-- Fixed: Wildcard check keeps Dashboard active for all roles --}}
                         <li>
                             <a href="{{ route('home') }}"
                                 class="{{ Request::is('*/dashboard') || Request::is('dashboard') || Request::is('/') ? 'active' : '' }}">
@@ -43,8 +42,8 @@
                                 Resource Catalog
                             </a>
                         </li>
-                        @if (Auth::check() && Auth::user()->role->name === 'admin')
-                        <li><a href="#">Activity Logs</a></li>
+                        @if (Auth::check() && Auth::user()->role && Auth::user()->role->name == 'admin')
+                            <li><a href="{{ route('activity.logs') }}">Activity Logs</a></li>
                         @endif
                     </ul>
                 </div>
@@ -53,7 +52,7 @@
                     <span class="nav-label">RESERVATIONS</span>
                     <ul>
                         @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
-                          {{--  <li><a href="#">My Requests</a></li> --}}
+                            {{--  <li><a href="#">My Requests</a></li> --}}
                             <li><a href="{{ route('reservations.index') }}"
                                     class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
                                     History</a></li>
@@ -74,12 +73,15 @@
                     <span class="nav-label">SUPPORT</span>
                     <ul>
                         <li>
-                            <a href="{{ route('incidents.create') }}" class="{{ Request::routeIs('incidents.create') ? 'active' : '' }}">
+                            <a href="{{ route('incidents.create') }}"
+                                class="{{ Request::routeIs('incidents.create') ? 'active' : '' }}">
                                 Report Technical Issue</a>
                         </li>
                         <li>
-                            <a href="{{ route('guest.policies') }}"
-                                class="{{ Request::is('*/policies') ? 'active' : '' }}">Usage Policies</a>
+                            <a href="{{ route('policies.show') }}"
+                                class="{{ Request::routeIs('policies.show') ? 'active' : '' }}">
+                                Usage Policies
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -91,7 +93,7 @@
             <header class="top-header">
                 <div class="header-left">
                     <nav class="breadcrumbs">
-                        <a href="{{ route('home') }}">AlphaFold DataCenter</a>
+                        <span class="breadcrumb-static">AlphaFold DataCenter</span>
                         <span class="crumb-divider">/</span>
                         <span class="current-page">@yield('title', 'Dashboard')</span>
                     </nav>
@@ -107,10 +109,10 @@
 
                     <div class="notification-bell">
                         🔔<span class="bell-count">0</span>
-                   </div>
+                    </div>
 
                     @auth
-                        {{-- User Profile: Flex container ensures space for logout --}}
+                        {{-- Used for logged-in Users --}}
                         <div class="user-profile">
                             <span class="badge">{{ Auth::user()->role->name }}</span>
 
@@ -124,6 +126,15 @@
                                 <button type="submit" class="logout-link">Logout</button>
                             </form>
                         </div>
+                    @else
+                        {{-- Show this for Guests --}}
+                        <div class="user-profile">
+                            <div class="user-identity">
+                                <span class="welcome-text">Mode:</span>
+                                <span class="username-display">Guest Access</span>
+                            </div>
+                            <a href="{{ route('login') }}" class="logout-link" style="text-decoration: none;">Logout</a>
+                        </div>
                     @endauth
                 </div>
             </header>
@@ -134,10 +145,21 @@
                     @yield('content')
                 </div>
             </main>
-
             <footer class="main-footer">
-                <div class="footer-section">
-                    <p>&copy; 2026 <span>AlphaFold DataCenter</span>. All rights reserved.</p>
+                <div class="footer-section left">
+                    <p>&copy; 2026 <strong>AlphaFold DataCenter</strong></p>
+                    <p class="location-text">📍 City Center, Place des Nations, Tanger, Maroc</p>
+                </div>
+
+                <div class="footer-section center">
+                    <ul class="footer-links">
+                        <li><a href="{{ route('policies.show') }}">Usage Policies</a></li>
+                        <li><span class="contact-info">Contact: +212 5 39 33 00 00</span></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section right">
+                    <span class="version-tag">Build: 1.0.4-STABLE</span>
                 </div>
             </footer>
         </div>

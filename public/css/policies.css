@@ -1,0 +1,63 @@
+/* Container Spacing */
+.dashboard-content {
+    padding: 30px;
+    background-color: #f8fafc;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 15px;
+}
+
+/* Responsive Grid */
+.policy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+/* Card Professionalism */
+.policy-card {
+    background: #ffffff;
+    border-top: 4px solid #0096FF; /* Theme Accent */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.policy-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.icon-box {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.policy-card h3 {
+    font-size: 1.2rem;
+    color: #1a202c;
+    margin-bottom: 10px;
+}
+
+.policy-card p {
+    font-size: 0.95rem;
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+/* Status Badge matching your UI */
+.status-badge {
+    background: #0096FF;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}

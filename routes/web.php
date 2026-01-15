@@ -26,6 +26,19 @@ Route::get('/', function () {
     }
     return view('auth.login'); // If not logged in, show login
 })->name('home');
+
+//--Guest section--//
+// --- A. ROLE: INVITE (Logged in user with limited rights) ---
+Route::prefix('guest')->group(function () {
+        // Dashboard (Required for Login Redirection)
+        Route::get('/dashboard', function () {
+            return view('Guest.dashboard');
+        })->name('guest.dashboard');
+
+        // Other logged-in guest features 
+        Route::get('/resources', [GuestController::class, 'index'])->name('guest.resources');
+    });
+
 // Common Tools: Search & Catalog 
 // mohamed: moved this from the middleware to outside here, because everyone can access it we dont have to securise it by the middleware
 Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');
@@ -41,8 +54,7 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 
 //moved the acc request here bcs Must be PUBLIC so they can ask for an account
 Route::get('/register-request', [GuestController::class, 'showRegisterForm'])->name('guest.register.show');
-Route::post('/register-request', [GuestController::class, 'submitRegisterRequest'])->name('guest.register.submit');
-
+Route::post('/register-request', [AuthController::class, 'register'])->name('guest.register.submit');
 
 // Authentication Logic
 //Route::post('/login', [AuthController::class, 'login']);
@@ -51,24 +63,16 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
+//USage policies available for every role to see.
+Route::get('/usage-policies', [AuthController::class, 'showPolicies'])->name('policies.show');
 
 
 // 2. PROTECTED ROUTES (Require Login)
 Route::middleware(['auth'])->group(function () {
 
-    // --- A. ROLE: INVITE (Logged in user with limited rights) ---
-    Route::prefix('guest')->middleware(['role:invite'])->group(function () {
-        // Dashboard (Required for Login Redirection)
-        Route::get('/dashboard', function () {
-            return view('Guest.dashboard');
-        })->name('guest.dashboard');
-
-        // Other logged-in guest features 
-        Route::get('/resources', [GuestController::class, 'index'])->name('guest.resources');
-        Route::get('/policies', [GuestController::class, 'policies'])->name('guest.policies');
-    });
-
+   Route::get('/activity-logs', function() {
+        return "Activity Logs Page - Coming Soon";
+    })->name('activity.logs');
 
     // --- B. ROLE: UTILISATEUR INTERNE ---  
     Route::prefix('my')->middleware(['role:utilisateur_interne'])->group(function () {  // changed from prefix user to prefix my  :mohammed 06/01
