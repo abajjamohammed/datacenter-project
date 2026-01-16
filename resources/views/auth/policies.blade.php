@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title', 'Usage Policies')
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/policies.css') }}">
 

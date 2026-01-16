@@ -72,11 +72,13 @@
                 <div class="nav-group">
                     <span class="nav-label">SUPPORT</span>
                     <ul>
+                        @auth {{-- Only show to logged-in users --}}
                         <li>
                             <a href="{{ route('incidents.create') }}"
                                 class="{{ Request::routeIs('incidents.create') ? 'active' : '' }}">
                                 Report Technical Issue</a>
                         </li>
+                        @endauth
                         <li>
                             <a href="{{ route('policies.show') }}"
                                 class="{{ Request::routeIs('policies.show') ? 'active' : '' }}">
