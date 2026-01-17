@@ -1,6 +1,12 @@
 @extends('layouts.app')
 @section('title', 'Manage Reservations')
 
+
+    @section('styles')
+    <link rel="stylesheet" href="{{ asset('css/manager.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/guest.css') }}">
+    @endsection
+
 @section('content')
 <div class="reservation-manager">
     <h1>Reservation Requests</h1>

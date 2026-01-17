@@ -21,7 +21,7 @@ class ManagerController extends Controller
         // Statistics
         $totalResources = $user->managedResources->count();
         $pendingReservations = Reservation::whereIn('resource_id', $myResourceIds)
-                                          ->where('reservation_status', 'En attente')
+                                          ->where('reservation_status', 'en_attente')
                                           ->count();
         $activeIncidents = Incident::whereIn('resource_id', $myResourceIds)
                                     ->where('incident_status', '!=', 'Resolved')
@@ -30,7 +30,7 @@ class ManagerController extends Controller
         // Recent Reservations waiting for approval
         $recentRequests = Reservation::with(['user', 'resource'])
                                      ->whereIn('resource_id', $myResourceIds)
-                                     ->where('reservation_status', 'En attente')
+                                     ->where('reservation_status', 'en_attente')
                                      ->latest()
                                      ->take(5)
                                      ->get();
