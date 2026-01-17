@@ -17,7 +17,7 @@ Route::get('/', function () {
     if (Auth::check()) {
         $role = Auth::user()->role->name;
 
-        return match($role) {
+        return match ($role) {
             'admin'                 => redirect()->route('admin.dashboard'),
             'responsable_technique' => redirect()->route('manager.dashboard'),
             'utilisateur_interne'   => redirect()->route('user.dashboard'),
@@ -27,6 +27,19 @@ Route::get('/', function () {
     }
     return view('auth.login'); // If not logged in, show login
 })->name('home');
+
+//--Guest section--//
+// --- A. ROLE: INVITE (Logged in user with limited rights) ---
+Route::prefix('guest')->group(function () {
+        // Dashboard (Required for Login Redirection)
+        Route::get('/dashboard', function () {
+            return view('Guest.dashboard');
+        })->name('guest.dashboard');
+
+        // Other logged-in guest features 
+        Route::get('/resources', [GuestController::class, 'index'])->name('guest.resources');
+    });
+
 // Common Tools: Search & Catalog 
 Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');
 
@@ -41,8 +54,7 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 
 //moved the acc request here bcs Must be PUBLIC so they can ask for an account
 Route::get('/register-request', [GuestController::class, 'showRegisterForm'])->name('guest.register.show');
-Route::post('/register-request', [GuestController::class, 'submitRegisterRequest'])->name('guest.register.submit');
-
+Route::post('/register-request', [AuthController::class, 'register'])->name('guest.register.submit');
 
 // Authentication Logic
 //Route::post('/login', [AuthController::class, 'login']);
@@ -51,33 +63,40 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
+//USage policies available for every role to see.
+Route::get('/usage-policies', [AuthController::class, 'showPolicies'])->name('policies.show');
 
 
 // 2. PROTECTED ROUTES (Require Login)
 Route::middleware(['auth'])->group(function () {
 
-    // --- A. ROLE: INVITE (Logged in user with limited rights) ---
-    Route::prefix('guest')->middleware(['role:invite'])->group(function () {
-        // Dashboard (Required for Login Redirection)
-        Route::get('/dashboard', function () {
-            return view('Guest.dashboard');
-        })->name('guest.dashboard');
+   Route::get('/activity-logs', function() {
+        return "Activity Logs Page - Coming Soon";
+    })->name('activity.logs');
 
-        // Other logged-in guest features 
-        Route::get('/resources', [GuestController::class, 'index'])->name('guest.resources');
-        Route::get('/policies', [GuestController::class, 'policies'])->name('guest.policies');
-    });
-
-
-    // --- B. ROLE: UTILISATEUR INTERNE ---
+    // --- B. ROLE: UTILISATEUR INTERNE ---  
     Route::prefix('my')->middleware(['role:utilisateur_interne'])->group(function () {  // changed from prefix user to prefix my  :mohammed 06/01
         // Dashboard (Required for Login Redirection)
-        Route::get('/dashboard', function () {
-            return view('user.dashboard');
-        })->name('user.dashboard');
+        //   Route::get('/dashboard', function () {
+        //       return view('user.dashboard');
+        //   })->name('user.dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index'])->name('user.dashboard');
+
+        // See all my reservations  :mohammed 08/01
+        Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+
+        // CREATE: Submit a new reservation   :mohammed 08/01
+        Route::get('/reservations/create/{resource}', [ReservationController::class, 'create'])->name('reservations.create');
+
 
         Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+
+        // CANCEL: Delete a pending reservation
+        Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+
+        //INCIDENTS: Report a technical issue
+        Route::get('/incidents/report', [\App\Http\Controllers\UserIncidentController::class, 'create'])->name('incidents.create');
+        Route::post('/incidents', [\App\Http\Controllers\UserIncidentController::class, 'store'])->name('incidents.store');
     });
 
 
@@ -118,10 +137,8 @@ Route::prefix('manager')->middleware(['auth', 'role:responsable_technique'])->gr
 
         Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve'])->name('reservations.approve');
     });
-
-
 });
- 
+
 
 
 

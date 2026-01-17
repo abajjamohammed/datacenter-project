@@ -45,6 +45,11 @@
                             </a>
                         </li>
 
+                            <a href="{{ route('catalog.index') }}"
+                                class="{{ Request::is('catalog*') ? 'active' : '' }}">
+                                Resource Catalog
+                            </a>
+                        </li>
                         @if (Auth::check() && Auth::user()->role && Auth::user()->role->name == 'admin')
                             <li><a href="{{ route('activity.logs') }}">Activity Logs</a></li>
                         @endif
@@ -65,6 +70,10 @@
                             <li><a href="{{ route('manager.reservations.index') }}"
                                     class="{{ Request::routeIs('manager.reservations.*') ? 'active' : '' }}">Manage
                                     Reservations</a></li>
+                            {{--  <li><a href="#">My Requests</a></li> --}}
+                            <li><a href="{{ route('reservations.index') }}"
+                                    class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
+                                    History</a></li>
                         @else
                             {{-- Guest --}}
                             <li>
@@ -88,6 +97,17 @@
                                 class="{{ Request::routeIs('incidents.create') || Request::routeIs('manager.incidents.*') ? 'active' : '' }}">
 
                                 {{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? 'Manage Incidents' : 'Report Technical Issue' }}
+                        @auth {{-- Only show to logged-in users --}}
+                        <li>
+                            <a href="{{ route('incidents.create') }}"
+                                class="{{ Request::routeIs('incidents.create') ? 'active' : '' }}">
+                                Report Technical Issue</a>
+                        </li>
+                        @endauth
+                        <li>
+                            <a href="{{ route('policies.show') }}"
+                                class="{{ Request::routeIs('policies.show') ? 'active' : '' }}">
+                                Usage Policies
                             </a>
                         </li>
 
@@ -179,6 +199,7 @@
                 <div class="footer-section center">
                     <ul class="footer-links">
                  {{--      <li><a href="{{ route('policies.show') }}">Usage Policies</a></li>  --}}
+                        <li><a href="{{ route('policies.show') }}">Usage Policies</a></li>
                         <li><span class="contact-info">Contact: +212 5 39 33 00 00</span></li>
                     </ul>
                 </div>
@@ -191,4 +212,5 @@
     </div>
 </body>
 
+</html>
 </html>

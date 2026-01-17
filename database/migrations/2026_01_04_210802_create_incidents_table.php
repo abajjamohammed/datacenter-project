@@ -18,15 +18,15 @@ return new class extends Migration
             ->constrained('resources')
             ->onDelete('cascade');  // fk for resources
             $table->foreignId('reservation_id')
-            ->constrained('reservations')
-            ->nullable();  // fk for reservation
+            ->nullable()
+            ->constrained('reservations'); // fk for reservation
             $table->string('title');
             $table->text('description');
             $table->enum('incident_status', ['ouvert', 'en_cours', 'résolu'])->default('ouvert');
             $table->enum('priority', ['basse', 'moyenne', 'haute' ])->default('moyenne');
             $table->foreignId('resolved_by')
-            ->constrained('users')
-            ->nullable();   // fk for user
+            ->nullable()
+            ->constrained('users');   // fk for user
             $table->dateTime('resolved_at')->nullable();
             $table->timestamps();
         });
