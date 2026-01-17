@@ -44,14 +44,15 @@
                                 {{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? 'My Resources' : 'Resource Catalog' }}
                             </a>
                         </li>
-
-                            <a href="{{ route('catalog.index') }}"
-                                class="{{ Request::is('catalog*') ? 'active' : '' }}">
-                                Resource Catalog
-                            </a>
+                        @if (Auth::check() && Auth::user()->role && Auth::user()->role->name != 'responsable_technique')
+                        <a href="{{ route('catalog.index') }}"
+                            class="{{ Request::is('catalog*') ? 'active' : '' }}">
+                            Resource Catalog
+                        </a>
+                        @endif
                         </li>
                         @if (Auth::check() && Auth::user()->role && Auth::user()->role->name == 'admin')
-                            <li><a href="{{ route('activity.logs') }}">Activity Logs</a></li>
+                        <li><a href="{{ route('activity.logs') }}">Activity Logs</a></li>
                         @endif
                     </ul>
                 </div>
@@ -60,29 +61,31 @@
                     <span class="nav-label">RESERVATIONS</span>
                     <ul>
                         @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
-                            {{-- Internal User --}}
-                            <li><a href="{{ route('reservations.index') }}"
-                                    class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
-                                    History</a></li>
+                        {{-- Internal User --}}
+                        <li><a href="{{ route('reservations.index') }}"
+                                class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
+                                History</a></li>
                         @elseif (Auth::check() && Auth::user()->role->name === 'responsable_technique')
-                          
+
                         {{-- Manager --}}
-                            <li><a href="{{ route('manager.reservations.index') }}"
-                                    class="{{ Request::routeIs('manager.reservations.*') ? 'active' : '' }}">Manage
-                                    Reservations</a></li>
-                            {{--  <li><a href="#">My Requests</a></li> --}}
-                            <li><a href="{{ route('reservations.index') }}"
-                                    class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
-                                    History</a></li>
+                        <li><a href="{{ route('manager.reservations.index') }}"
+                                class="{{ Request::routeIs('manager.reservations.*') ? 'active' : '' }}">Manage
+                                Reservations</a></li>
+                        {{-- <li><a href="#">My Requests</a></li> --}}
+                        @if (Auth::check() && Auth::user()->role && Auth::user()->role->name == 'admin')
+                        <li><a href="{{ route('reservations.index') }}"
+                                class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
+                                History</a></li>
+                        @endif
                         @else
-                            {{-- Guest --}}
-                            <li>
-                                <a href="{{ route('guest.register.show') }}"
-                                    class="{{ Request::is('*/register-request') ? 'active' : '' }}"
-                                    style="color: #0096FF; font-weight: 700;">
-                                    Apply for Access
-                                </a>
-                            </li>
+                        {{-- Guest --}}
+                        <li>
+                            <a href="{{ route('guest.register.show') }}"
+                                class="{{ Request::is('*/register-request') ? 'active' : '' }}"
+                                style="color: #0096FF; font-weight: 700;">
+                                Apply for Access
+                            </a>
+                        </li>
                         @endif
                     </ul>
 
@@ -97,12 +100,14 @@
                                 class="{{ Request::routeIs('incidents.create') || Request::routeIs('manager.incidents.*') ? 'active' : '' }}">
 
                                 {{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? 'Manage Incidents' : 'Report Technical Issue' }}
-                        @auth {{-- Only show to logged-in users --}}
+                                @auth {{-- Only show to logged-in users --}}
+                                @if (Auth::check() && Auth::user()->role && Auth::user()->role->name == 'utilisateur_interne')
                         <li>
                             <a href="{{ route('incidents.create') }}"
                                 class="{{ Request::routeIs('incidents.create') ? 'active' : '' }}">
                                 Report Technical Issue</a>
                         </li>
+                        @endif
                         @endauth
                         <li>
                             <a href="{{ route('policies.show') }}"
@@ -113,20 +118,20 @@
 
                         {{-- Moderation link ONLY for Manager --}}
                         @if (Auth::check() && Auth::user()->role->name === 'responsable_technique')
-                            <li>
-                                <a href="{{ route('manager.moderation.index') }}"
-                                    class="{{ Request::routeIs('manager.moderation.*') ? 'active' : '' }}">
-                                    Moderation
-                                </a>
-                            </li>
+                        <li>
+                            <a href="{{ route('manager.moderation.index') }}"
+                                class="{{ Request::routeIs('manager.moderation.*') ? 'active' : '' }}">
+                                Moderation
+                            </a>
+                        </li>
                         @endif
 
-                   {{--  <li>
+                        {{-- <li>
                             <a href="{{ route('policies.show') }}"
-                                class="{{ Request::routeIs('policies.show') ? 'active' : '' }}">
-                                Usage Policies
-                            </a>
-                        </li>   --}}
+                        class="{{ Request::routeIs('policies.show') ? 'active' : '' }}">
+                        Usage Policies
+                        </a>
+                        </li> --}}
                     </ul>
 
                 </div>
@@ -157,29 +162,29 @@
                     </div>
 
                     @auth
-                        {{-- Used for logged-in Users --}}
-                        <div class="user-profile">
-                            <span class="badge">{{ Auth::user()->role->name }}</span>
+                    {{-- Used for logged-in Users --}}
+                    <div class="user-profile">
+                        <span class="badge">{{ Auth::user()->role->name }}</span>
 
-                            <div class="user-identity">
-                                <span class="welcome-text">Welcome,</span>
-                                <span class="username-display">{{ Auth::user()->name }}</span>
-                            </div>
-
-                            <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
-                                @csrf
-                                <button type="submit" class="logout-link">Logout</button>
-                            </form>
+                        <div class="user-identity">
+                            <span class="welcome-text">Welcome,</span>
+                            <span class="username-display">{{ Auth::user()->name }}</span>
                         </div>
+
+                        <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
+                            @csrf
+                            <button type="submit" class="logout-link">Logout</button>
+                        </form>
+                    </div>
                     @else
-                        {{-- Show this for Guests --}}
-                        <div class="user-profile">
-                            <div class="user-identity">
-                                <span class="welcome-text">Mode:</span>
-                                <span class="username-display">Guest Access</span>
-                            </div>
-                            <a href="{{ route('login') }}" class="logout-link" style="text-decoration: none;">Logout</a>
+                    {{-- Show this for Guests --}}
+                    <div class="user-profile">
+                        <div class="user-identity">
+                            <span class="welcome-text">Mode:</span>
+                            <span class="username-display">Guest Access</span>
                         </div>
+                        <a href="{{ route('login') }}" class="logout-link" style="text-decoration: none;">Logout</a>
+                    </div>
                     @endauth
                 </div>
             </header>
@@ -198,7 +203,7 @@
 
                 <div class="footer-section center">
                     <ul class="footer-links">
-                 {{--      <li><a href="{{ route('policies.show') }}">Usage Policies</a></li>  --}}
+                        {{-- <li><a href="{{ route('policies.show') }}">Usage Policies</a></li> --}}
                         <li><a href="{{ route('policies.show') }}">Usage Policies</a></li>
                         <li><span class="contact-info">Contact: +212 5 39 33 00 00</span></li>
                     </ul>
@@ -213,4 +218,5 @@
 </body>
 
 </html>
+
 </html>

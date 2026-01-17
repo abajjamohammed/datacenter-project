@@ -7,14 +7,24 @@
         <h1>My Infrastructure</h1>
         <button onclick="document.getElementById('add-modal').style.display='block'" class="btn-primary-small">+ Add Resource</button>
     </div>
-    
-    @if(session('success')) 
-        <div class="alert-success">{{ session('success') }}</div> 
+
+    @if(session('success'))
+    <div class="alert-success">{{ session('success') }}</div>
     @endif
+
+    @section('styles')
+    <link rel="stylesheet" href="{{ asset('css/manager.css') }}">
+    @endsection
 
     <table class="resource-table">
         <thead>
-            <tr><th>Name</th><th>Category</th><th>Location</th><th>Status</th><th>Actions</th></tr>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
             @foreach($resources as $resource)
@@ -54,7 +64,7 @@
             @endforeach
         </tbody>
     </table>
-    
+
     <!-- Add Modal -->
     <div id="add-modal" class="modal-overlay">
         <div class="modal-box">

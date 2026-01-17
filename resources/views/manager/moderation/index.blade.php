@@ -1,6 +1,10 @@
 @extends('layouts.app')
 @section('title', 'Moderation')
 
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/manager.css') }}">
+@endsection
+
 @section('content')
 <h1 class="text-danger-header">🛡️ Moderation</h1>
 @foreach($alerts as $alert)

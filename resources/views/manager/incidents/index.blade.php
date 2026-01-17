@@ -1,10 +1,21 @@
 @extends('layouts.app')
 @section('title', 'Incident Management')
 
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/manager.css') }}">
+@endsection
+
 @section('content')
 <h1>Reported Incidents</h1>
 <table class="resource-table">
-    <thead><tr><th>Status</th><th>Resource</th><th>Issue</th><th>Action</th></tr></thead>
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Resource</th>
+            <th>Issue</th>
+            <th>Action</th>
+        </tr>
+    </thead>
     <tbody>
         @foreach($incidents as $inc)
         <tr>
