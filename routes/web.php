@@ -9,6 +9,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\ManagerController;
 
 
 // 1. PUBLIC ROUTES
@@ -40,7 +41,6 @@ Route::prefix('guest')->group(function () {
     });
 
 // Common Tools: Search & Catalog 
-// mohamed: moved this from the middleware to outside here, because everyone can access it we dont have to securise it by the middleware
 Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');
 
 
@@ -100,18 +100,32 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
+    // ---C. ROLE: RESPONSABLE TECHNIQUE ---
+Route::prefix('manager')->middleware(['auth', 'role:responsable_technique'])->group(function () {
+    
+    // Dashboard
+    Route::get('/dashboard', [App\Http\Controllers\ManagerController::class, 'dashboard'])->name('manager.dashboard');
 
+    // Resources (Add, Edit, Disable, Maintenance)
+    Route::get('/resources', [App\Http\Controllers\ManagerController::class, 'myResources'])->name('manager.resources.index');
+    Route::post('/resources', [App\Http\Controllers\ManagerController::class, 'storeResource'])->name('manager.resources.store');
+    Route::put('/resources/{id}', [App\Http\Controllers\ManagerController::class, 'updateResource'])->name('manager.resources.update');
+    Route::delete('/resources/{id}', [App\Http\Controllers\ManagerController::class, 'destroyResource'])->name('manager.resources.destroy');
+    Route::post('/resources/{id}/maintenance', [App\Http\Controllers\ManagerController::class, 'toggleMaintenance'])->name('manager.resources.maintenance');
 
-    // --- C. ROLE: RESPONSABLE TECHNIQUE ---
-    Route::prefix('manager')->middleware(['role:responsable_technique'])->group(function () {   // changed from user prefix to manager prefix  :mohammed 06/01
-        // Dashboard
-        Route::get('/dashboard', function () {
-            return view('manager.dashboard');
-        })->name('manager.dashboard');
+    // Reservations (Approve, Reject)
+    Route::get('/reservations', [App\Http\Controllers\ManagerController::class, 'reservations'])->name('manager.reservations.index');
+    Route::post('/reservations/{id}/approve', [App\Http\Controllers\ManagerController::class, 'approveReservation'])->name('manager.reservations.approve');
+    Route::post('/reservations/{id}/reject', [App\Http\Controllers\ManagerController::class, 'rejectReservation'])->name('manager.reservations.reject');
 
-        Route::post('/reservations/approve', [ReservationController::class, 'approve'])->name('manager.reservations.approve');
-        // Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');  replaced it wth the previous line :mohammed
-    });
+    // Incidents (Resolve)
+    Route::get('/incidents', [App\Http\Controllers\ManagerController::class, 'incidents'])->name('manager.incidents.index');
+    Route::post('/incidents/{id}/resolve', [App\Http\Controllers\ManagerController::class, 'resolveIncident'])->name('manager.incidents.resolve');
+
+    // Moderation (Delete)
+    Route::get('/moderation', [App\Http\Controllers\ManagerController::class, 'moderation'])->name('manager.moderation.index');
+    Route::delete('/moderation/incident/{id}', [App\Http\Controllers\ManagerController::class, 'destroyIncident'])->name('manager.moderation.delete');
+});
 
 
     // --- D. ROLE: ADMIN ---

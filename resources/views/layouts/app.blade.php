@@ -36,7 +36,15 @@
                                 Dashboard
                             </a>
                         </li>
+
                         <li>
+                            <a href="{{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? route('manager.resources.index') : route('catalog.index') }}"
+                                class="{{ Request::is('catalog*') || Request::is('manager/resources*') ? 'active' : '' }}">
+
+                                {{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? 'My Resources' : 'Resource Catalog' }}
+                            </a>
+                        </li>
+
                             <a href="{{ route('catalog.index') }}"
                                 class="{{ Request::is('catalog*') ? 'active' : '' }}">
                                 Resource Catalog
@@ -52,12 +60,22 @@
                     <span class="nav-label">RESERVATIONS</span>
                     <ul>
                         @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
+                            {{-- Internal User --}}
+                            <li><a href="{{ route('reservations.index') }}"
+                                    class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
+                                    History</a></li>
+                        @elseif (Auth::check() && Auth::user()->role->name === 'responsable_technique')
+                          
+                        {{-- Manager --}}
+                            <li><a href="{{ route('manager.reservations.index') }}"
+                                    class="{{ Request::routeIs('manager.reservations.*') ? 'active' : '' }}">Manage
+                                    Reservations</a></li>
                             {{--  <li><a href="#">My Requests</a></li> --}}
                             <li><a href="{{ route('reservations.index') }}"
                                     class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
                                     History</a></li>
                         @else
-                            {{-- Specific style for Guests to Apply for Access --}}
+                            {{-- Guest --}}
                             <li>
                                 <a href="{{ route('guest.register.show') }}"
                                     class="{{ Request::is('*/register-request') ? 'active' : '' }}"
@@ -67,11 +85,18 @@
                             </li>
                         @endif
                     </ul>
+
                 </div>
 
                 <div class="nav-group">
                     <span class="nav-label">SUPPORT</span>
                     <ul>
+                        <li>
+                            {{-- Report Issue (User) OR Manage Incidents (Manager) --}}
+                            <a href="{{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? route('manager.incidents.index') : route('incidents.create') }}"
+                                class="{{ Request::routeIs('incidents.create') || Request::routeIs('manager.incidents.*') ? 'active' : '' }}">
+
+                                {{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? 'Manage Incidents' : 'Report Technical Issue' }}
                         @auth {{-- Only show to logged-in users --}}
                         <li>
                             <a href="{{ route('incidents.create') }}"
@@ -85,7 +110,25 @@
                                 Usage Policies
                             </a>
                         </li>
+
+                        {{-- Moderation link ONLY for Manager --}}
+                        @if (Auth::check() && Auth::user()->role->name === 'responsable_technique')
+                            <li>
+                                <a href="{{ route('manager.moderation.index') }}"
+                                    class="{{ Request::routeIs('manager.moderation.*') ? 'active' : '' }}">
+                                    Moderation
+                                </a>
+                            </li>
+                        @endif
+
+                   {{--  <li>
+                            <a href="{{ route('policies.show') }}"
+                                class="{{ Request::routeIs('policies.show') ? 'active' : '' }}">
+                                Usage Policies
+                            </a>
+                        </li>   --}}
                     </ul>
+
                 </div>
             </nav>
         </aside>
@@ -155,6 +198,7 @@
 
                 <div class="footer-section center">
                     <ul class="footer-links">
+                 {{--      <li><a href="{{ route('policies.show') }}">Usage Policies</a></li>  --}}
                         <li><a href="{{ route('policies.show') }}">Usage Policies</a></li>
                         <li><span class="contact-info">Contact: +212 5 39 33 00 00</span></li>
                     </ul>
@@ -168,4 +212,5 @@
     </div>
 </body>
 
+</html>
 </html>
