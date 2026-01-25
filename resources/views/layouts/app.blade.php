@@ -10,20 +10,21 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
     
-    {{-- Individual Page Styles (e.g. Guest or Manager Specific) --}}
+    {{-- Individual Page Styles --}}
     @yield('styles')
 
-    {{-- FontAwesome for Sidebar Icons --}}
+    {{-- FontAwesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    {{-- NOTIFICATION CSS --}}
+    {{-- CRITICAL: NOTIFICATION CSS (This fixes the broken layout) --}}
     <style>
         /* Notification Container */
         .notification-container {
             position: relative;
             margin-right: 25px;
             cursor: pointer;
+            display: inline-block; /* Ensures it sits correctly */
         }
 
         .notification-bell {
@@ -31,15 +32,15 @@
             position: relative;
             color: #555;
             transition: 0.3s;
-            padding: 5px;
+            padding: 10px;
         }
         
         .notification-container:hover .notification-bell { color: #3498db; }
 
         .bell-count {
             position: absolute;
-            top: 0;
-            right: 0;
+            top: 5px;
+            right: 5px;
             background-color: #e74c3c;
             color: white;
             font-size: 0.65rem;
@@ -49,11 +50,11 @@
             font-weight: bold;
         }
 
-        /* Dropdown Logic (Show on Hover) */
+        /* Dropdown Logic (Hidden by default, shown on hover) */
         .notif-dropdown {
-            display: none; /* Hidden by default */
+            display: none; 
             position: absolute;
-            top: 40px;
+            top: 100%; /* Push it below the bell */
             right: -10px;
             width: 320px;
             background: white;
@@ -64,12 +65,12 @@
             overflow: hidden;
         }
 
-        /* Show Dropdown on Hover of Container */
+        /* Show Dropdown on Hover */
         .notification-container:hover .notif-dropdown {
             display: block;
         }
 
-        /* Dropdown Content */
+        /* Dropdown Content Styling */
         .notif-header {
             padding: 12px 15px;
             border-bottom: 1px solid #eee;
@@ -126,7 +127,7 @@
             
             <nav class="sidebar-nav">
                 
-                {{-- 1. COMMON MENU (Visible to All) --}}
+                {{-- 1. COMMON MENU --}}
                 <div class="nav-group">
                     <span class="nav-label">MAIN MENU</span>
                     <ul>
@@ -143,7 +144,7 @@
                     </ul>
                 </div>
 
-                {{-- 2. ADMIN SPECIFIC MENU --}}
+                {{-- 2. ADMIN MENU --}}
                 @if(Auth::check() && Auth::user()->role->name === 'admin')
                     <div class="nav-group">
                         <span class="nav-label">ADMINISTRATION</span>
@@ -164,7 +165,6 @@
                                 </a>
                             </li>
                             <li>
-                                {{-- UPDATED LINK HERE --}}
                                 <a href="{{ route('admin.logs.index') }}" class="{{ Request::is('admin/logs*') ? 'active' : '' }}">
                                     <i class="fas fa-history" style="width:20px; text-align:center; margin-right:8px;"></i> Global Logs
                                 </a>
@@ -173,7 +173,7 @@
                     </div>
                 @endif
 
-                {{-- 3. MANAGER SPECIFIC MENU --}}
+                {{-- 3. MANAGER MENU --}}
                 @if(Auth::check() && Auth::user()->role->name === 'responsable_technique')
                     <div class="nav-group">
                         <span class="nav-label">MANAGEMENT</span>
@@ -300,7 +300,6 @@
                     
                     @auth
                         <div class="user-profile">
-                            {{-- Role Badge --}}
                             @php
                                 $roleColors = [
                                     'admin' => '#e74c3c', // Red
@@ -329,7 +328,7 @@
             </header>
 
             <main class="content-body">
-                {{-- Flash Messages for Success/Error --}}
+                {{-- Flash Messages --}}
                 @if(session('success'))
                     <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
                         <i class="fas fa-check-circle"></i> {{ session('success') }}

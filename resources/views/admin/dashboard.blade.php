@@ -15,6 +15,7 @@
         .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         
+        
         /* HEADERS */
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .section-header h2 { font-size: 1.5rem; color: #2c3e50; border-left: 5px solid #3498db; padding-left: 15px; }
