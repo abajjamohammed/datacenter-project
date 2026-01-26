@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlphaFold DataCenter - @yield('title')</title>
-
+    
     {{-- Global Styles --}}
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
-
-    {{-- Individual Page Styles (e.g. Guest or Manager Specific) --}}
+    
+    {{-- Individual Page Styles --}}
     @yield('styles')
 
-    {{-- FontAwesome for Sidebar Icons --}}
+    {{-- FontAwesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -25,6 +24,7 @@
             position: relative;
             margin-right: 25px;
             cursor: pointer;
+            display: inline-block;
         }
 
         .notification-bell {
@@ -32,15 +32,15 @@
             position: relative;
             color: #555;
             transition: 0.3s;
-            padding: 5px;
+            padding: 10px;
         }
         
         .notification-container:hover .notification-bell { color: #3498db; }
 
         .bell-count {
             position: absolute;
-            top: 0;
-            right: 0;
+            top: 5px;
+            right: 5px;
             background-color: #e74c3c;
             color: white;
             font-size: 0.65rem;
@@ -50,11 +50,11 @@
             font-weight: bold;
         }
 
-        /* Dropdown Logic (Show on Hover) */
+        /* Dropdown Logic */
         .notif-dropdown {
-            display: none; /* Hidden by default */
+            display: none; 
             position: absolute;
-            top: 40px;
+            top: 100%;
             right: -10px;
             width: 320px;
             background: white;
@@ -65,12 +65,10 @@
             overflow: hidden;
         }
 
-        /* Show Dropdown on Hover of Container */
         .notification-container:hover .notif-dropdown {
             display: block;
         }
 
-        /* Dropdown Content */
         .notif-header {
             padding: 12px 15px;
             border-bottom: 1px solid #eee;
@@ -116,7 +114,6 @@
         .empty-notif i { font-size: 2rem; margin-bottom: 10px; opacity: 0.3; display: block; }
     </style>
 </head>
-
 <body>
     <div class="app-container">
         {{-- Sidebar Section --}}
@@ -125,27 +122,19 @@
                 <div class="logo-sphere"></div>
                 <h1>AlphaFold DC</h1>
             </div>
-
+            
             <nav class="sidebar-nav">
                 
-                {{-- 1. COMMON MENU (Visible to All) --}}
+                {{-- 1. COMMON MENU --}}
                 <div class="nav-group">
                     <span class="nav-label">MAIN MENU</span>
                     <ul>
                         <li>
-<<<<<<< HEAD
                             <a href="{{ route('home') }}" class="{{ Request::is('*/dashboard') || Request::is('dashboard') || Request::is('/') ? 'active' : '' }}">
                                 <i class="fas fa-tachometer-alt" style="width:20px; text-align:center; margin-right:8px;"></i> Dashboard
-=======
-                            <a href="{{ route('home') }}"
-                                class="{{ Request::is('*/dashboard') || Request::is('dashboard') || Request::is('/') ? 'active' : '' }}">
-                                Dashboard
->>>>>>> 59e178f31f1b698f419b741b42ef769fe6fdd215
                             </a>
                         </li>
-
                         <li>
-<<<<<<< HEAD
                             <a href="{{ route('catalog.index') }}" class="{{ Request::is('catalog*') ? 'active' : '' }}">
                                 <i class="fas fa-box" style="width:20px; text-align:center; margin-right:8px;"></i> Resource Catalog
                             </a>
@@ -153,7 +142,7 @@
                     </ul>
                 </div>
 
-                {{-- 2. ADMIN SPECIFIC MENU --}}
+                {{-- 2. ADMIN MENU --}}
                 @if(Auth::check() && Auth::user()->role->name === 'admin')
                     <div class="nav-group">
                         <span class="nav-label">ADMINISTRATION</span>
@@ -174,7 +163,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#">
+                                <a href="{{ route('admin.logs.index') }}" class="{{ Request::is('admin/logs*') ? 'active' : '' }}">
                                     <i class="fas fa-history" style="width:20px; text-align:center; margin-right:8px;"></i> Global Logs
                                 </a>
                             </li>
@@ -182,13 +171,13 @@
                     </div>
                 @endif
 
-                {{-- 3. MANAGER SPECIFIC MENU --}}
+                {{-- 3. MANAGER MENU --}}
                 @if(Auth::check() && Auth::user()->role->name === 'responsable_technique')
                     <div class="nav-group">
                         <span class="nav-label">MANAGEMENT</span>
                         <ul>
-                            <li><a href="#"><i class="fas fa-check-circle"></i> Approve Requests</a></li>
-                            <li><a href="#"><i class="fas fa-network-wired"></i> My Resources</a></li>
+                            <li><a href="{{ route('manager.reservations.index') }}"><i class="fas fa-check-circle"></i> Approve Requests</a></li>
+                            <li><a href="{{ route('manager.resources.index') }}"><i class="fas fa-network-wired"></i> My Resources</a></li>
                         </ul>
                     </div>
                 @endif
@@ -198,8 +187,7 @@
                     <div class="nav-group">
                         <span class="nav-label">MY RESERVATIONS</span>
                         <ul>
-                            <li><a href="#"><i class="fas fa-plus-circle"></i> New Request</a></li>
-                            <li><a href="#"><i class="fas fa-list"></i> My History</a></li>
+                            <li><a href="{{ route('reservations.index') }}"><i class="fas fa-list"></i> My History</a></li>
                         </ul>
                     </div>
                 @endif
@@ -217,111 +205,17 @@
                         </ul>
                     </div>
                 @endif
-=======
-                            <a href="{{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? route('manager.resources.index') : route('catalog.index') }}"
-                                class="{{ Request::is('catalog*') || Request::is('manager/resources*') ? 'active' : '' }}">
-
-                                {{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? 'My Resources' : 'Resource Catalog' }}
-                            </a>
-                        </li>
-                        @if (Auth::check() && Auth::user()->role && Auth::user()->role->name != 'responsable_technique')
-                        <a href="{{ route('catalog.index') }}"
-                            class="{{ Request::is('catalog*') ? 'active' : '' }}">
-                            Resource Catalog
-                        </a>
-                        @endif
-                        </li>
-                        @if (Auth::check() && Auth::user()->role && Auth::user()->role->name == 'admin')
-                        <li><a href="{{ route('activity.logs') }}">Activity Logs</a></li>
-                        @endif
-                    </ul>
-                </div>
-
-                <div class="nav-group">
-                    <span class="nav-label">RESERVATIONS</span>
-                    <ul>
-                        @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
-                        {{-- Internal User --}}
-                        <li><a href="{{ route('reservations.index') }}"
-                                class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
-                                History</a></li>
-                        @elseif (Auth::check() && Auth::user()->role->name === 'responsable_technique')
-
-                        {{-- Manager --}}
-                        <li><a href="{{ route('manager.reservations.index') }}"
-                                class="{{ Request::routeIs('manager.reservations.*') ? 'active' : '' }}">Manage
-                                Reservations</a></li>
-                        {{-- <li><a href="#">My Requests</a></li> --}}
-                        @if (Auth::check() && Auth::user()->role && Auth::user()->role->name == 'admin')
-                        <li><a href="{{ route('reservations.index') }}"
-                                class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
-                                History</a></li>
-                        @endif
-                        @else
-                        {{-- Guest --}}
-                        <li>
-                            <a href="{{ route('guest.register.show') }}"
-                                class="{{ Request::is('*/register-request') ? 'active' : '' }}"
-                                style="color: #0096FF; font-weight: 700;">
-                                Apply for Access
-                            </a>
-                        </li>
-                        @endif
-                    </ul>
-
-                </div>
->>>>>>> 59e178f31f1b698f419b741b42ef769fe6fdd215
 
                 <div class="nav-group">
                     <span class="nav-label">SUPPORT</span>
                     <ul>
-<<<<<<< HEAD
                         <li><a href="#"><i class="fas fa-life-ring" style="width:20px; text-align:center; margin-right:8px;"></i> Report Issue</a></li>
                         <li>
                             <a href="{{ route('guest.policies') }}" class="{{ Request::is('*/policies') ? 'active' : '' }}">
                                 <i class="fas fa-file-contract" style="width:20px; text-align:center; margin-right:8px;"></i> Usage Policies
-=======
-                        <li>
-                            {{-- Report Issue (User) OR Manage Incidents (Manager) --}}
-                            <a href="{{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? route('manager.incidents.index') : route('incidents.create') }}"
-                                class="{{ Request::routeIs('incidents.create') || Request::routeIs('manager.incidents.*') ? 'active' : '' }}">
-
-                                {{ Auth::check() && Auth::user()->role->name === 'responsable_technique' ? 'Manage Incidents' : 'Report Technical Issue' }}
-                                @auth {{-- Only show to logged-in users --}}
-                                @if (Auth::check() && Auth::user()->role && Auth::user()->role->name == 'utilisateur_interne')
-                        <li>
-                            <a href="{{ route('incidents.create') }}"
-                                class="{{ Request::routeIs('incidents.create') ? 'active' : '' }}">
-                                Report Technical Issue</a>
-                        </li>
-                        @endif
-                        @endauth
-                        <li>
-                            <a href="{{ route('policies.show') }}"
-                                class="{{ Request::routeIs('policies.show') ? 'active' : '' }}">
-                                Usage Policies
->>>>>>> 59e178f31f1b698f419b741b42ef769fe6fdd215
                             </a>
                         </li>
-
-                        {{-- Moderation link ONLY for Manager --}}
-                        @if (Auth::check() && Auth::user()->role->name === 'responsable_technique')
-                        <li>
-                            <a href="{{ route('manager.moderation.index') }}"
-                                class="{{ Request::routeIs('manager.moderation.*') ? 'active' : '' }}">
-                                Moderation
-                            </a>
-                        </li>
-                        @endif
-
-                        {{-- <li>
-                            <a href="{{ route('policies.show') }}"
-                        class="{{ Request::routeIs('policies.show') ? 'active' : '' }}">
-                        Usage Policies
-                        </a>
-                        </li> --}}
                     </ul>
-
                 </div>
             </nav>
         </aside>
@@ -331,23 +225,21 @@
             <header class="top-header">
                 <div class="header-left">
                     <nav class="breadcrumbs">
-                        <span class="breadcrumb-static">AlphaFold DataCenter</span>
+                        <a href="{{ route('home') }}">AlphaFold DataCenter</a>
                         <span class="crumb-divider">/</span>
                         <span class="current-page">@yield('title', 'Dashboard')</span>
                     </nav>
-
+                    
                     <form action="{{ route('catalog.index') }}" method="GET" class="header-search">
                         <span class="search-icon">🔍</span>
-                        <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Search resources...">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search resources...">
                     </form>
                 </div>
 
                 <div class="header-right">
-<<<<<<< HEAD
                     {{-- Quick Action for Users --}}
                     @if(Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
-                        <button class="btn-primary-small">+ New Request</button>
+                        <a href="{{ route('catalog.index') }}" class="btn-primary-small" style="text-decoration:none;">+ New Request</a>
                     @endif
                     
                     {{-- Admin Quick Action --}}
@@ -418,43 +310,23 @@
                             <span class="badge" style="background-color: {{ $color }}; color: white;">
                                 {{ ucfirst(str_replace('_', ' ', Auth::user()->role->name)) }}
                             </span>
-=======
 
-                    <div class="notification-bell">
-                        🔔<span class="bell-count">0</span>
-                    </div>
+                            <div class="user-identity">
+                                <span class="welcome-text">Welcome,</span>
+                                <span class="username-display">{{ Auth::user()->name }}</span>
+                            </div>
 
-                    @auth
-                    {{-- Used for logged-in Users --}}
-                    <div class="user-profile">
-                        <span class="badge">{{ Auth::user()->role->name }}</span>
->>>>>>> 59e178f31f1b698f419b741b42ef769fe6fdd215
-
-                        <div class="user-identity">
-                            <span class="welcome-text">Welcome,</span>
-                            <span class="username-display">{{ Auth::user()->name }}</span>
+                            <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
+                                @csrf
+                                <button type="submit" class="logout-link">Logout</button>
+                            </form>
                         </div>
-
-                        <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
-                            @csrf
-                            <button type="submit" class="logout-link">Logout</button>
-                        </form>
-                    </div>
-                    @else
-                    {{-- Show this for Guests --}}
-                    <div class="user-profile">
-                        <div class="user-identity">
-                            <span class="welcome-text">Mode:</span>
-                            <span class="username-display">Guest Access</span>
-                        </div>
-                        <a href="{{ route('login') }}" class="logout-link" style="text-decoration: none;">Logout</a>
-                    </div>
                     @endauth
                 </div>
             </header>
 
             <main class="content-body">
-                {{-- Flash Messages for Success/Error --}}
+                {{-- Flash Messages --}}
                 @if(session('success'))
                     <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
                         <i class="fas fa-check-circle"></i> {{ session('success') }}
@@ -471,28 +343,13 @@
                     @yield('content')
                 </div>
             </main>
+
             <footer class="main-footer">
-                <div class="footer-section left">
-                    <p>&copy; 2026 <strong>AlphaFold DataCenter</strong></p>
-                    <p class="location-text">📍 City Center, Place des Nations, Tanger, Maroc</p>
-                </div>
-
-                <div class="footer-section center">
-                    <ul class="footer-links">
-                        {{-- <li><a href="{{ route('policies.show') }}">Usage Policies</a></li> --}}
-                        <li><a href="{{ route('policies.show') }}">Usage Policies</a></li>
-                        <li><span class="contact-info">Contact: +212 5 39 33 00 00</span></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section right">
-                    <span class="version-tag">Build: 1.0.4-STABLE</span>
+                <div class="footer-section">
+                    <p>&copy; 2026 <span>AlphaFold DataCenter</span>. All rights reserved.</p>
                 </div>
             </footer>
         </div>
     </div>
 </body>
-
-</html>
-
 </html>
