@@ -51,7 +51,7 @@
                                 {{-- i added Auth::check() &&(line33) to verify the connection and the mode lecture badge for the other cases (line38) --}}
                                 {{-- Guest view --}}
                                 <span class="badge">Mode Lecture</span>
-                                <a href="{{ route('guest.register.show') }}" class="btn-action btn-outline">Apply for
+                                <a href="{{ route('auth.register') }}" class="btn-action btn-outline">Apply for
                                     Access</a>
                             @endif
                         </div>

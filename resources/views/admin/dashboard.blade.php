@@ -221,6 +221,7 @@
                         <td>{{ $req->created_at->format('M d') }}</td>
                         <td>
                             <a href="#" class="action-btn btn-check" title="Approve"><i class="fas fa-check"></i></a>
+                            <a href="#" class="action-btn btn-ban" title="Reject">X<i ></i></a>
                         </td>
                     </tr>
                     @empty

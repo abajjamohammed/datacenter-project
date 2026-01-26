@@ -21,77 +21,100 @@ use App\Http\Controllers\AdminAccountRequestController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\UserDashboardController; // Ensure this exists from pull
 use App\Http\Controllers\UserIncidentController; // Ensure this exists from pull
+//use App\Http\Controllers\AdminController;
 
-// ==========================================
-// 1. PUBLIC ROUTES (No Login Required)
-// ==========================================
-
+// 1. PUBLIC ROUTES
 Route::get('/', function () {
     if (Auth::check()) {
         $role = Auth::user()->role->name;
-        return match($role) {
+
+        return match ($role) {
             'admin'                 => redirect()->route('admin.dashboard'),
             'responsable_technique' => redirect()->route('manager.dashboard'),
             'utilisateur_interne'   => redirect()->route('user.dashboard'),
             'invite'                => redirect()->route('guest.dashboard'),
-            default                 => redirect()->route('catalog.index'),
+             default                => redirect()->route('catalog.index'),
         };
     }
-    return view('auth.login'); 
+    return view('auth.login'); // If not logged in, show login
 })->name('home');
 
-// Common Tools
-Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');
-Route::get('/usage-policies', [AuthController::class, 'showPolicies'])->name('policies.show');
+//--Guest section--//
+// --- A. ROLE: INVITE (Logged in user with limited rights) ---
+Route::prefix('guest')->group(function () {
+    // Dashboard (Required for Login Redirection)
+    Route::get('/dashboard', function () {
+        return view('Guest.dashboard');
+    })->name('guest.dashboard');
 
-// Auth Views & Logic
+    // Other logged-in guest features 
+    Route::get('/resources', [GuestController::class, 'index'])->name('guest.resources');
+});
+
+// Common Tools: Search & Catalog 
+// mohamed: moved this from the middleware to outside here, because everyone can access it we dont have to securise it by the middleware
+Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');
+
+
+// Authentication Forms
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
+
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+
+//moved the acc request here bcs Must be PUBLIC so they can ask for an account
+Route::get('/register-request', [GuestController::class, 'showRegisterForm'])->name('auth.register');
+Route::post('/register-request', [AuthController::class, 'register'])->name('guest.register.submit');
+
+
+// Authentication Logic
+//Route::post('/login', [AuthController::class, 'login']);
+//Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Registration
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.store');
-
-// Guest Account Request
-Route::get('/register-request', [GuestController::class, 'showRegisterForm'])->name('guest.register.show');
-Route::post('/register-request', [GuestController::class, 'submitRegisterRequest'])->name('guest.register.submit');
+//USage policies available for every role to see.
+Route::get('/usage-policies', [AuthController::class, 'showPolicies'])->name('policies.show');
 
 
-// ==========================================
-// 2. PROTECTED ROUTES (Login Required)
-// ==========================================
-
+// 2. PROTECTED ROUTES (Require Login)
 Route::middleware(['auth'])->group(function () {
 
-    // --- GLOBAL: NOTIFICATIONS ---
-    Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::get('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+    Route::get('/activity-logs', function () {
+        return "Activity Logs Page - Coming Soon";
+    })->name('activity.logs');
 
-    // --- A. ROLE: INVITE ---
-    Route::prefix('guest')->middleware(['role:invite'])->group(function () {
-        Route::get('/dashboard', function () { return view('Guest.dashboard'); })->name('guest.dashboard');
-        Route::get('/resources', [GuestController::class, 'index'])->name('guest.resources');
-        Route::get('/policies', [GuestController::class, 'policies'])->name('guest.policies');
-    });
+    // --- B. ROLE: UTILISATEUR INTERNE ---  
+    Route::prefix('my')->middleware(['role:utilisateur_interne'])->group(function () {  // changed from prefix user to prefix my  :mohammed 06/01
+        // Dashboard (Required for Login Redirection)
+        //   Route::get('/dashboard', function () {
+        //       return view('user.dashboard');
+        //   })->name('user.dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index'])->name('user.dashboard');
 
-    // --- B. ROLE: INTERNAL USER (Merged Remote Work) ---
-    Route::prefix('my')->middleware(['role:utilisateur_interne'])->group(function () { 
-        // Dashboard
-        Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
-
-        // Reservations
+        // See all my reservations  :mohammed 08/01
         Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+
+        // CREATE: Submit a new reservation   :mohammed 08/01
         Route::get('/reservations/create/{resource}', [ReservationController::class, 'create'])->name('reservations.create');
+
+
         Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+
+        // CANCEL: Delete a pending reservation
         Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
 
-        // Incidents
-        Route::get('/incidents/report', [UserIncidentController::class, 'create'])->name('incidents.create');
-        Route::post('/incidents', [UserIncidentController::class, 'store'])->name('incidents.store');
+        //INCIDENTS: Report a technical issue
+        Route::get('/incidents/report', [\App\Http\Controllers\UserIncidentController::class, 'create'])->name('incidents.create');
+        Route::post('/incidents', [\App\Http\Controllers\UserIncidentController::class, 'store'])->name('incidents.store');
     });
 
-    // --- C. ROLE: MANAGER (Merged Remote Work) ---
+
+
+
     Route::prefix('manager')->middleware(['role:responsable_technique'])->group(function () {
         // Dashboard
         Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard');
@@ -117,6 +140,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/moderation/incident/{id}', [ManagerController::class, 'destroyIncident'])->name('manager.moderation.delete');
     });
 
+
     // --- D. ROLE: ADMIN (Your Work) ---
     Route::prefix('admin')->middleware(['role:admin'])->group(function () {
         // 1. Dashboard
@@ -132,24 +156,22 @@ Route::middleware(['auth'])->group(function () {
 
         // 4. Maintenance Management
         Route::resource('maintenances', AdminMaintenanceController::class)
-             ->only(['index', 'create', 'store', 'destroy'])
-             ->names('admin.maintenances');
+            ->only(['index', 'create', 'store', 'destroy'])
+            ->names('admin.maintenances');
 
-        // 5. Global Logs
-        Route::get('/logs', [AdminLogController::class, 'index'])->name('admin.logs.index');
+
 
         // 6. Reservation Actions
         Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve'])->name('reservations.approve');
 
         // 7. Account Request Actions
-        Route::post('/account-requests/{id}/approve', [AdminAccountRequestController::class, 'approve'])->name('admin.accounts.approve');
-        Route::post('/account-requests/{id}/reject', [AdminAccountRequestController::class, 'reject'])->name('admin.accounts.reject');
+    //    Route::post('/account-requests/{id}/approve', [AdminAccountRequestController::class, 'approve'])->name('admin.accounts.approve');
+    //    Route::post('/account-requests/{id}/reject', [AdminAccountRequestController::class, 'reject'])->name('admin.accounts.reject');
     });
-
-}); 
+});
 
 // Activity Logs Placeholder (From Remote)
-Route::get('/activity-logs', function() {
+Route::get('/activity-logs', function () {
     return "Activity Logs Page - Coming Soon";
 })->name('activity.logs');
 

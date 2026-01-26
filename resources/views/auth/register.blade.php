@@ -13,7 +13,7 @@
         <h1>AlphaFold <span>Data Center</span></h1>
         <h2>Create Account</h2>
 
-        <form action="{{ route('guest.register.submit') }}" method="POST" id="registerForm">
+        <form action="{{ route('auth.register') }}" method="POST" id="registerForm">
             @csrf
 
             {{-- 1. Full Name --}}

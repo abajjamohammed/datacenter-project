@@ -25,7 +25,7 @@
                 </div>
                 <p class="description">To reserve high-performance resources like Server Alpha, you must first submit an official access request for review.</p>
                 <div class="card-actions">
-                    <a href="{{ route('guest.register.show') }}" class="btn-catalog-primary">Apply for Access</a>
+                    <a href="{{ route('auth.register') }}" class="btn-catalog-primary">Apply for Access</a>
                 </div>
             </div>
         </div>

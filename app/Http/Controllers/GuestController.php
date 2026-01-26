@@ -17,7 +17,7 @@ class GuestController extends Controller
     // 2. MISSING FUNCTION 1: Show the form
     // This fixes the error in your screenshot
     public function showRegisterForm() {
-        return view('guest.register-request'); // We will create this view next
+        return view('auth.register'); // We will create this view next
     }
 
     // 3. MISSING FUNCTION 2: Handle the form submission
