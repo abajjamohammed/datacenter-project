@@ -8,17 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         // Share notification data with the layout view automatically

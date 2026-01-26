@@ -15,9 +15,12 @@ class ResourceController extends Controller
         // Query resources based on name or technical specs
         $resources = Resource::when($search, function ($query, $search) {
             return $query->where('name', 'like', "%{$search}%")
-                         ->orWhere('type', 'like', "%{$search}%")
-                         ->orWhere('location', 'like', "%{$search}%");
-        })->get();
+                       //  ->orWhere('type', 'like', "%{$search}%") we dont have type in db :mohammed 13/01
+                         ->orWhere('location', 'like', "%{$search}%")
+                         ->orWhere('description', 'like', "%{$search}%");
+        })  ->where('is_active', true) // Only show active resources
+            ->with('category') // Eager load category to prevent N+1 queries
+            ->get();
 
         // Return the view (we will create this next)
         return view('catalog', compact('resources', 'search'));

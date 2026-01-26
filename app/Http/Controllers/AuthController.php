@@ -3,19 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; //REQUIRED 
+use Illuminate\Support\Facades\Auth; 
 use App\Models\User;
 use App\Models\Role;
-use Illuminate\Support\Facades\Hash; //Encrypts passwords
+use Illuminate\Support\Facades\Hash; 
+use App\Models\AccountRequest;
 
 class AuthController extends Controller
 {
-    // Display the Login Form
     public function showLogin()
     {
         return view('auth.login');
     }
-
 
     public function login(Request $request)
     {
@@ -26,8 +25,6 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            // return redirect()->intended('/');   mohammed: re,oved this bcs its redirect every1 to the home page, but we have to redirect every user to his specific dashboard
-            // On récupère le rôle pour savoir où l'envoyer
             $role = Auth::user()->role->name;
 
             switch ($role) {
@@ -47,48 +44,54 @@ class AuthController extends Controller
         return back()->withErrors(['email' => 'The provided credentials do not match our records.']);
     }
 
-    // Display the Registration Form
     public function showRegister()
     {
         return view('auth.register');
     }
 
-
     public function register(Request $request)
     {
+        // 1. Validate the incoming request
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-        //  'role_id'  => 'required|integer|exists:roles,id',  mohammed: removed for sercurity
-            // added those, u forgot them!  :mohammed  06/01
-            'department' => 'nullable|string',
-            'phone' => 'nullable|string',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|string|email|max:255|unique:account_requests,email',
+            'password'      => 'required|string|min:8',
+            'justification' => 'required|string|max:2000',
+            'department'    => 'nullable|string',
+            'phone'         => 'nullable|string',
         ]);
 
-        // On cherche l'ID du rôle 'invite' dans la base de données
+        /* --- COMMENTED OUT OLD LOGIC (Creates user immediately) ---
         $roleInvite = Role::where('name', 'invite')->first();
-
-        // Si le rôle n'existe pas, on gère l'erreur
         if (!$roleInvite) {
             return back()->withErrors(['email' => 'Erreur système : Rôle invité introuvable.']);
         }
-
-
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role_id'  => $roleInvite->id,   //we force the role id, so no 1 can wirte for ex an admin id and access to it    
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'password'   => Hash::make($request->password),
+            'role_id'    => $roleInvite->id,
             'department' => $request->department,
-            'phone' => $request->phone,
-            'is_active' => true
+            'phone'      => $request->phone,
+            'is_active'  => true
         ]);
-     
-
         Auth::login($user);
-       // return redirect('/')->with('success', 'Account created successfully!');
-        return redirect()->route('guest.dashboard')->with('success', 'Account created successfully!'); // mohammed: we redirect the guest to his dashboard
+        return redirect()->route('guest.dashboard')->with('success', 'Account created successfully!');
+        ------------------------------------------------------------- */
+
+        // 2. NEW LOGIC: Save to account_requests table
+        AccountRequest::create([
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'password'      => Hash::make($request->password),
+            'department'    => $request->department,
+            'phone'         => $request->phone,
+            'justification' => $request->justification,
+            'status'        => 'en_attente',
+        ]);
+
+        // 3. Redirect back to login with success message
+        return redirect()->route('guest.dashboard')->with('success', 'Request submitted successfully! An admin will review it soon.');
     }
 
     // Added Logout for completeness
@@ -99,4 +102,8 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         return redirect('/login');
     }
+    public function showPolicies() {
+    return view('auth.policies'); // Move the view file to the 'auth' folder for better organization
+    }
 }
+

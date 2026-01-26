@@ -10,7 +10,7 @@
 <div class="dashboard-wrapper">
     {{-- Header section matching catalog style --}}
     <div class="page-header">
-        <h1>Welcome, <span class="highlight-blue">{{ Auth::user()->name }}</span></h1>
+        <h1>Welcome, <span class="highlight-blue">{{ Auth::user()->name ?? 'Guest'}}</span></h1>
         <p class="subtitle">AlphaFold Data Center Management System</p>
     </div>
 
