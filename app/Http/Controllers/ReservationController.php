@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Models\Reservation;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
+
 
 class ReservationController extends Controller
 {
@@ -67,10 +69,10 @@ class ReservationController extends Controller
     {
         //  Validate inputs
         $validated = $request->validate([
-            'resource_id'   => 'required|exists:resources,id', 
+            'resource_id'   => 'required|exists:resources,id',
             'start_date'    => 'required|date|after_or_equal:now',
             'end_date'      => 'required|date|after:start_date',
-            'justification' => 'required|string|min:10', 
+            'justification' => 'required|string|min:10',
         ], [
             'start_date.after_or_equal' => 'Start date must be today or later.',
             'end_date.after' => 'End date must be after the start date.',
@@ -94,19 +96,29 @@ class ReservationController extends Controller
         }
 
         // and now we can Create Reservation
-        Reservation::create([
+        $reservation = Reservation::create([
             'user_id'            => Auth::id(),
             'resource_id'        => $validated['resource_id'], // Don't forget to save this!
             'start_date'         => $validated['start_date'],
             'end_date'           => $validated['end_date'],
             'justification'      => $validated['justification'],
-            'reservation_status' => 'en_attente', 
+            'reservation_status' => 'en_attente',
+        ]);
+
+        // 👉 NOTIFY THE MANAGER
+        Notification::create([
+            'user_id' => $reservation->resource->responsable_id, // The person in charge of this specific resource
+            'type' => 'reservation_response',
+            'title' => 'New Reservation Request',
+            'message' => Auth::user()->name . " has requested '{$reservation->resource->name}'.",
+            'reservation_id' => $reservation->id,
+            'is_read' => false
         ]);
 
         return redirect()->route('reservations.index')->with('success', 'Reservation created successfully!');
     }
 
-   //this fun is to delete a reservation
+    //this fun is to delete a reservation
     public function destroy(Reservation $reservation)
     {
         // 1. Security Check: Ensure the logged-in user owns this reservation

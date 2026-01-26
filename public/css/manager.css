@@ -110,7 +110,8 @@
 
 /* --- Modals --- */
 .modal-overlay {
-    display: none; /* Toggled via JS */
+    display: none;
+    /* Toggled via JS */
     position: fixed;
     top: 0;
     left: 0;
@@ -126,4 +127,21 @@
     margin: 50px auto;
     padding: 30px;
     border-radius: 10px;
+}
+
+table tr {
+    height: 50px;
+    /* Adjust this value for more or less space */
+}
+
+table td {
+    padding: 12px 8px;
+    /* Top/bottom and left/right padding */
+}
+
+/* Alternative: if you want more space between rows */
+table {
+    border-spacing: 0 10px;
+    /* 10px vertical space between rows */
+    border-collapse: separate;
 }

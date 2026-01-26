@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Resource;
 use App\Models\Incident;
+use App\Models\Notification;
 
 class UserIncidentController extends Controller
 {
@@ -32,10 +33,10 @@ class UserIncidentController extends Controller
             'title'       => 'required|string|max:255',
             'priority'    => 'required|in:basse,moyenne,haute',
             'description' => 'required|string|min:10',
-            'reservation_id' => 'nullable|exists:reservations,id', 
+            'reservation_id' => 'nullable|exists:reservations,id',
         ]);
 
-        Incident::create([
+        $incident = Incident::create([
             'user_id'         => Auth::id(),
             'resource_id'     => $validated['resource_id'],
             'reservation_id'  => $validated['reservation_id'] ?? null,
@@ -43,6 +44,14 @@ class UserIncidentController extends Controller
             'priority'        => $validated['priority'],
             'description'     => $validated['description'],
             'incident_status' => 'ouvert', // Default status
+        ]);
+
+        Notification::create([
+            'user_id' => $incident->resource->responsable_id,
+            'type' => 'incident',
+            'title' => 'Technical Incident Reported',
+            'message' => "An incident was reported on '{$incident->resource->name}' by " . Auth::user()->name,
+            'is_read' => false
         ]);
 
         return redirect()->route('user.dashboard')->with('success', 'Incident reported successfully. The management team has been notified.');

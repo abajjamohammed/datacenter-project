@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Role;
-use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\Hash;
 use App\Models\AccountRequest;
 
 class AuthController extends Controller
@@ -80,7 +80,7 @@ class AuthController extends Controller
         ------------------------------------------------------------- */
 
         // 2. NEW LOGIC: Save to account_requests table
-        AccountRequest::create([
+        $newRequest = AccountRequest::create([
             'name'          => $request->name,
             'email'         => $request->email,
             'password'      => Hash::make($request->password),
@@ -89,6 +89,21 @@ class AuthController extends Controller
             'justification' => $request->justification,
             'status'        => 'en_attente',
         ]);
+
+        // 2. NOW notify the Admin that someone new applied!
+        $admins = \App\Models\User::whereHas('role', function ($q) {
+            $q->where('name', 'admin');
+        })->get();
+
+        foreach ($admins as $admin) {
+            \App\Models\Notification::create([
+                'user_id' => $admin->id,
+                'type'    => 'account', // This matches your ENUM exactly
+                'title'   => 'New Access Request',
+                'message' => "{$newRequest->name} just submitted a new account request.",
+                'is_read' => false
+            ]);
+        }
 
         // 3. Redirect back to login with success message
         return redirect()->route('guest.dashboard')->with('success', 'Request submitted successfully! An admin will review it soon.');
@@ -102,8 +117,8 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         return redirect('/login');
     }
-    public function showPolicies() {
-    return view('auth.policies'); // Move the view file to the 'auth' folder for better organization
+    public function showPolicies()
+    {
+        return view('auth.policies'); // Move the view file to the 'auth' folder for better organization
     }
 }
-

@@ -33,7 +33,7 @@ Route::get('/', function () {
             'responsable_technique' => redirect()->route('manager.dashboard'),
             'utilisateur_interne'   => redirect()->route('user.dashboard'),
             'invite'                => redirect()->route('guest.dashboard'),
-             default                => redirect()->route('catalog.index'),
+            default                => redirect()->route('catalog.index'),
         };
     }
     return view('auth.login'); // If not logged in, show login
@@ -83,9 +83,9 @@ Route::get('/usage-policies', [AuthController::class, 'showPolicies'])->name('po
 // 2. PROTECTED ROUTES (Require Login)
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/activity-logs', function () {
-        return "Activity Logs Page - Coming Soon";
-    })->name('activity.logs');
+    // Notification Routes
+    Route::get('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+    Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 
     // --- B. ROLE: UTILISATEUR INTERNE ---  
     Route::prefix('my')->middleware(['role:utilisateur_interne'])->group(function () {  // changed from prefix user to prefix my  :mohammed 06/01
@@ -165,8 +165,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve'])->name('reservations.approve');
 
         // 7. Account Request Actions
-    //    Route::post('/account-requests/{id}/approve', [AdminAccountRequestController::class, 'approve'])->name('admin.accounts.approve');
-    //    Route::post('/account-requests/{id}/reject', [AdminAccountRequestController::class, 'reject'])->name('admin.accounts.reject');
+        Route::post('/account-requests/{id}/approve', [AdminAccountRequestController::class, 'approve'])->name('admin.accounts.approve');
+        Route::post('/account-requests/{id}/reject', [AdminAccountRequestController::class, 'reject'])->name('admin.accounts.reject');
     });
 });
 

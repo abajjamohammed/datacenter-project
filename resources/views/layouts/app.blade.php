@@ -39,17 +39,17 @@
                         <li>
                             @php
                                 // Determine the correct route based on the user's status/role
-                                $dashboardRoute = route('guest.dashboard'); // Default for guests
+$dashboardRoute = route('guest.dashboard'); // Default for guests
 
-                                if (Auth::check()) {
-                                    $role = Auth::user()->role->name;
-                                    if ($role === 'admin') {
-                                        $dashboardRoute = route('admin.dashboard');
-                                    } elseif ($role === 'responsable_technique') {
-                                        $dashboardRoute = route('manager.dashboard');
-                                    } elseif ($role === 'utilisateur_interne') {
-                                        $dashboardRoute = route('user.dashboard');
-                                                                    }
+if (Auth::check()) {
+    $role = Auth::user()->role->name;
+    if ($role === 'admin') {
+        $dashboardRoute = route('admin.dashboard');
+    } elseif ($role === 'responsable_technique') {
+        $dashboardRoute = route('manager.dashboard');
+    } elseif ($role === 'utilisateur_interne') {
+        $dashboardRoute = route('user.dashboard');
+                                    }
                                 }
                             @endphp
 
@@ -154,13 +154,6 @@
                                     Technical Tickets
                                 </a>
                             </li>
-                            <li>
-                                <a href="{{ route('manager.moderation.index') }}"
-                                    class="{{ Request::is('manager/moderation*') ? 'active' : '' }}">
-                                    <i class="fas fa-shield-alt"></i>
-                                    Content Moderation
-                                </a>
-                            </li>
                         @endif
                         @if (Auth::check() && Auth::user()->role?->name === 'admin')
                             <li>
@@ -191,12 +184,13 @@
                         <span class="crumb-divider">/</span>
                         <span class="current-page">@yield('title', 'Dashboard')</span>
                     </nav>
-
-                    <form action="{{ route('catalog.index') }}" method="GET" class="header-search">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Search resources...">
-                    </form>
+                    @if (!Auth::check() || (Auth::user()->role->name !== 'admin' && Auth::user()->role->name !== 'responsable_technique'))
+                        <form action="{{ route('catalog.index') }}" method="GET" class="header-search">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" name="search" value="{{ request('search') }}"
+                                placeholder="Search resources...">
+                        </form>
+                    @endif
                 </div>
 
                 <div class="header-right">

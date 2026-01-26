@@ -31,7 +31,10 @@ class NotificationController extends Controller
     
     public function markAllRead()
     {
-        Auth::user()->unreadNotifications()->update(['is_read' => true]);
+        Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
         return back()->with('success', 'All notifications marked as read.');
     }
 }
