@@ -82,38 +82,38 @@ if (Auth::check()) {
                         @endif
                     </ul>
                 </div>
-    
-                    <div class="nav-group">
-                        @if (Auth::check() && Auth::user()->role->name !== 'admin')
+
+                <div class="nav-group">
+                    @if (Auth::check() && Auth::user()->role->name !== 'admin')
                         <span class="nav-label">RESERVATIONS</span>
+                    @endif
+                    <ul>
+                        @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
+                            {{--  <li><a href="#">My Requests</a></li> --}}
+                            <li><a href="{{ route('reservations.index') }}"
+                                    class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
+                                    History</a></li>
+                        @elseif (!Auth::check() || (Auth::check() && Auth::user()->role->name === 'invite'))
+                            {{-- Specific style for Guests to Apply for Access --}}
+                            <li>
+                                <a href="{{ route('auth.register') }}"
+                                    class="{{ Request::is('*/register-request') ? 'active' : '' }}">
+                                    Apply for Access
+                                </a>
+                            </li>
+                        @elseif (Auth::check() && Auth::user()->role->name === 'responsable_technique')
+                            <li>
+                                <a href="{{ route('manager.reservations.index') }}"
+                                    class="{{ Request::is('manager/reservations*') ? 'active' : '' }}">
+                                    <i class="fas fa-check-circle"
+                                        style="width:20px; text-align:center; margin-right:8px;"></i>
+                                    Approve Requests
+                                </a>
+                            </li>
                         @endif
-                        <ul>
-                            @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
-                                {{--  <li><a href="#">My Requests</a></li> --}}
-                                <li><a href="{{ route('reservations.index') }}"
-                                        class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
-                                        History</a></li>
-                            @elseif (!Auth::check() || (Auth::check() && Auth::user()->role->name === 'invite'))
-                                {{-- Specific style for Guests to Apply for Access --}}
-                                <li>
-                                    <a href="{{ route('auth.register') }}"
-                                        class="{{ Request::is('*/register-request') ? 'active' : '' }}">
-                                        Apply for Access
-                                    </a>
-                                </li>
-                            @elseif (Auth::check() && Auth::user()->role->name === 'responsable_technique')
-                                <li>
-                                    <a href="{{ route('manager.reservations.index') }}"
-                                        class="{{ Request::is('manager/reservations*') ? 'active' : '' }}">
-                                        <i class="fas fa-check-circle"
-                                            style="width:20px; text-align:center; margin-right:8px;"></i>
-                                        Approve Requests
-                                    </a>
-                                </li>
-                            @endif
-                        </ul>
-                    </div>
-             
+                    </ul>
+                </div>
+
 
                 {{-- ADMIN SECTION --}}
                 @if (Auth::check() && Auth::user()->role?->name === 'admin')
@@ -134,6 +134,14 @@ if (Auth::check()) {
                                     <i class="fas fa-server"
                                         style="width:20px; text-align:center; margin-right:8px;"></i>
                                     System Resources
+                                </a>
+                            </li>
+                            <li>
+                                {{-- UPDATED LINK HERE --}}
+                                <a href="{{ route('admin.logs.index') }}"
+                                    class="{{ Request::is('admin/logs*') ? 'active' : '' }}">
+                                    <i class="fas fa-history"
+                                        style="width:20px; text-align:center; margin-right:8px;"></i> Global Logs
                                 </a>
                             </li>
                         </ul>

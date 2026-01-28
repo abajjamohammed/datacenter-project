@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Resource;
 use App\Models\Incident;
 use App\Models\Notification;
+use App\Models\ActivityLog;
 
 class UserIncidentController extends Controller
 {
@@ -53,6 +54,13 @@ class UserIncidentController extends Controller
             'message' => "An incident was reported on '{$incident->resource->name}' by " . Auth::user()->name,
             'is_read' => false
         ]);
+
+        // 🔥 LOG ACTIVITY
+        ActivityLog::record(
+            'Reported Incident',
+            "User reported {$validated['priority']} priority incident for {$incident->resource->name}: {$validated['title']}",
+            $incident
+        );
 
         return redirect()->route('user.dashboard')->with('success', 'Incident reported successfully. The management team has been notified.');
     }

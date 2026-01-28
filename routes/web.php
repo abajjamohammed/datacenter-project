@@ -156,6 +156,13 @@ Route::middleware(['auth'])->group(function () {
         // 7. Account Request Actions
         Route::post('/account-requests/{id}/approve', [AdminAccountRequestController::class, 'approve'])->name('admin.accounts.approve');
         Route::post('/account-requests/{id}/reject', [AdminAccountRequestController::class, 'reject'])->name('admin.accounts.reject');
+
+               // 5. Global Logs
+        Route::get('/logs', [AdminLogController::class, 'index'])->name('admin.logs.index');
+
     });
-});
+
+    });
+    
+
 

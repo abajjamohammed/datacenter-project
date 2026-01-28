@@ -10,6 +10,7 @@ use App\Models\Reservation;
 use App\Models\Maintenance;
 use App\Models\Incident;
 use App\Models\Notification;
+use App\Models\ActivityLog;
 
 class ManagerController extends Controller
 {
@@ -59,7 +60,7 @@ class ManagerController extends Controller
             'location' => 'required|string',
         ]);
 
-        Resource::create([
+        $resource = Resource::create([
             'name' => $request->name,
             'category_id' => $request->category_id,
             'description' => $request->description,
@@ -69,6 +70,13 @@ class ManagerController extends Controller
             'responsable_id' => Auth::id(), // Assigned to YOU
             'is_active' => true,
         ]);
+
+        // 🔥 LOG ACTIVITY
+        ActivityLog::record(
+            'Manager Created Resource',
+            "Manager created new resource: {$resource->name} at location: {$resource->location}",
+            $resource
+        );
 
         return back()->with('success', 'Resource created successfully.');
     }
@@ -85,6 +93,26 @@ class ManagerController extends Controller
             'location' => $request->location,
         ]);
 
+        // 🔥 CAPTURE OLD VALUES
+        $oldName = $resource->name;
+        $oldLocation = $resource->location;
+        // 🔥 LOG ACTIVITY WITH CHANGES
+        $changes = [];
+        if ($oldName !== $resource->name) {
+            $changes[] = "Name: {$oldName} → {$resource->name}";
+        }
+        if ($oldLocation !== $resource->location) {
+            $changes[] = "Location: {$oldLocation} → {$resource->location}";
+        }
+
+        $changeDescription = !empty($changes) ? " (" . implode(', ', $changes) . ")" : "";
+
+        ActivityLog::record(
+            'Manager Updated Resource',
+            "Manager updated resource: {$resource->name}{$changeDescription}",
+            $resource
+        );
+
         return back()->with('success', 'Resource updated successfully.');
     }
 
@@ -93,6 +121,18 @@ class ManagerController extends Controller
         $resource = Resource::where('id', $id)->where('responsable_id', Auth::id())->firstOrFail();
         // Soft disable
         $resource->update(['is_active' => false]);
+
+        // 🔥 CAPTURE NAME BEFORE DEACTIVATION
+        $resourceName = $resource->name;
+
+        $resource->update(['is_active' => false]);
+
+        // 🔥 LOG ACTIVITY
+        ActivityLog::record(
+            'Manager Deactivated Resource',
+            "Manager deactivated resource: {$resourceName}",
+            $resource
+        );
         return back()->with('success', 'Resource deactivated.');
     }
 
@@ -103,6 +143,14 @@ class ManagerController extends Controller
         if ($resource->resource_status === 'maintenance') {
             // Turning maintenance OFF
             $resource->update(['resource_status' => 'disponible']);
+
+            // 🔥 ADD THIS FOR TURNING OFF:
+            ActivityLog::record(
+                'Cleared Maintenance Mode',
+                "Manager cleared maintenance mode for resource: {$resource->name}",
+                $resource
+            );
+
             $message = 'Resource is now available.';
         } else {
             // Turning maintenance ON - Requires validation because DB is NOT NULL
@@ -113,13 +161,22 @@ class ManagerController extends Controller
 
             $resource->update(['resource_status' => 'maintenance']);
 
-            Maintenance::create([
+            $maintenance = Maintenance::create([
                 'resource_id' => $resource->id,
                 'description' => $request->description,
                 'start_date'  => now(),
-                'end_date'    => $request->end_date, // Now correctly passed from form
+                'end_date'    => $request->end_date,
                 'created_by'  => Auth::id(),
             ]);
+
+            // 🔥 ADD THIS RIGHT HERE (AFTER MAINTENANCE::CREATE):
+            ActivityLog::record(
+                'Scheduled Maintenance',
+                "Manager scheduled maintenance for {$resource->name} until " .
+                    \Carbon\Carbon::parse($request->end_date)->format('Y-m-d H:i') .
+                    " - Reason: {$request->description}",
+                $maintenance
+            );
 
             $message = 'Maintenance scheduled successfully.';
         }
@@ -177,6 +234,13 @@ class ManagerController extends Controller
             'is_read' => false
         ]);
 
+        // 🔥 LOG ACTIVITY
+        ActivityLog::record(
+            'Approved Reservation',
+            "Manager approved reservation #{$reservation->id} for {$reservation->user->name} - Resource: {$reservation->resource->name} ({$reservation->start_date} to {$reservation->end_date}) - Justification: {$request->approval_comment}",
+            $reservation
+        );
+
         return back()->with('success', 'Reservation approved successfully with justification.');
     }
 
@@ -214,6 +278,13 @@ class ManagerController extends Controller
             'is_read' => false
         ]);
 
+        // 🔥 LOG ACTIVITY
+        ActivityLog::record(
+            'Rejected Reservation',
+            "Manager rejected reservation #{$reservation->id} for {$reservation->user->name} - Resource: {$reservation->resource->name} - Reason: {$request->rejection_reason}",
+            $reservation
+        );
+
 
         return back()->with('success', 'Reservation rejected with justification.');
     }
@@ -242,6 +313,13 @@ class ManagerController extends Controller
             'resolved_at' => now(),
         ]);
 
+        // 🔥 LOG ACTIVITY
+        ActivityLog::record(
+            'Resolved Incident',
+            "Manager resolved incident #{$incident->id} for resource: {$incident->resource->name} - Title: {$incident->title}",
+            $incident
+        );
+
         // 👉 NOTIFY THE USER WHO REPORTED IT
         Notification::create([
             'user_id' => $incident->user_id,
@@ -262,6 +340,20 @@ class ManagerController extends Controller
             })->firstOrFail();
 
         $incident->delete(); // Delete inappropriate content
+
+        // 🔥 CAPTURE DATA BEFORE DELETION
+        $incidentTitle = $incident->title;
+        $resourceName = $incident->resource->name;
+        $reporterName = $incident->reporter->name;
+
+        // 🔥 LOG BEFORE DELETION
+        ActivityLog::record(
+            'Deleted Incident',
+            "Manager deleted inappropriate incident report: '{$incidentTitle}' for resource: {$resourceName} (reported by: {$reporterName})",
+            null
+        );
+
+        $incident->delete();
         return back()->with('success', 'Inappropriate alert deleted.');
     }
 }

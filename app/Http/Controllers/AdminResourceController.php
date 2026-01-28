@@ -6,6 +6,7 @@ use App\Models\Resource;
 use App\Models\ResourceCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\ActivityLog;
 
 class AdminResourceController extends Controller
 {
@@ -17,7 +18,7 @@ class AdminResourceController extends Controller
         $resources = Resource::with(['category', 'responsable'])
             ->when($search, function ($query, $search) {
                 return $query->where('name', 'like', "%{$search}%")
-                             ->orWhere('location', 'like', "%{$search}%");
+                    ->orWhere('location', 'like', "%{$search}%");
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -30,7 +31,7 @@ class AdminResourceController extends Controller
     {
         $categories = ResourceCategory::all();
         // Get users who are 'responsable_technique' to assign as managers
-        $managers = User::whereHas('role', function($q) {
+        $managers = User::whereHas('role', function ($q) {
             $q->where('name', 'responsable_technique');
         })->get();
 
@@ -62,7 +63,7 @@ class AdminResourceController extends Controller
             'Other' => $request->other_specs
         ];
 
-        Resource::create([
+        $resource = Resource::create([
             'name' => $request->name,
             'category_id' => $request->category_id,
             'location' => $request->location,
@@ -72,16 +73,20 @@ class AdminResourceController extends Controller
             'resource_status' => 'disponible',
             'is_active' => true,
         ]);
+        ActivityLog::record(
+            'Created Resource',
+            "Created new resource: {$resource->name} ({$resource->category->name})",
+            $resource
+        );
 
         return redirect()->route('admin.resources.index')->with('success', 'Resource created successfully.');
     }
-
     // 4. SHOW EDIT FORM
     public function edit($id)
     {
         $resource = Resource::findOrFail($id);
         $categories = ResourceCategory::all();
-        $managers = User::whereHas('role', function($q) {
+        $managers = User::whereHas('role', function ($q) {
             $q->where('name', 'responsable_technique');
         })->get();
 
@@ -119,6 +124,14 @@ class AdminResourceController extends Controller
             'specifications' => $specs,
         ]);
 
+        $oldName = $resource->name;
+
+        ActivityLog::record(
+            'Updated Resource',
+            "Updated resource: {$oldName} → {$resource->name}",
+            $resource
+        );
+
         return redirect()->route('admin.resources.index')->with('success', 'Resource updated successfully.');
     }
 
@@ -130,6 +143,15 @@ class AdminResourceController extends Controller
         // If deactivated, force status to 'hors_service'
         $resource->resource_status = $resource->is_active ? 'disponible' : 'hors_service';
         $resource->save();
+        $action = $resource->is_active ? 'Activated Resource' : 'Deactivated Resource';
+        $status = $resource->is_active ? 'Activated' : 'Deactivated';
+
+        ActivityLog::record(
+            $action,
+            "{$status} resource: {$resource->name}",
+            $resource
+        );
+
         return back()->with('success', 'Resource status updated.');
     }
 
@@ -138,6 +160,19 @@ class AdminResourceController extends Controller
     {
         $resource = Resource::findOrFail($id);
         $resource->delete();
+
+        // 🔥 CAPTURE NAME BEFORE DELETION:
+        $resourceName = $resource->name;
+
+        // 🔥 LOG BEFORE DELETING:
+        ActivityLog::record(
+            'Deleted Resource',
+            "Deleted resource: {$resourceName}",
+            null // Don't pass model since it will be deleted
+        );
+
+        $resource->delete();
+
         return back()->with('success', 'Resource deleted successfully.');
     }
 }

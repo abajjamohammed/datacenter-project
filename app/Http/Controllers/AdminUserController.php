@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth; // Added this import
+use App\Models\ActivityLog;
 
 class AdminUserController extends Controller
 {
@@ -19,7 +20,7 @@ class AdminUserController extends Controller
         $users = User::with('role')
             ->when($search, function ($query, $search) {
                 return $query->where('name', 'like', "%{$search}%")
-                             ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -50,7 +51,13 @@ class AdminUserController extends Controller
         $validated['password'] = Hash::make($validated['password']);
         $validated['is_active'] = true;
 
-        User::create($validated);
+        $user = User::create($validated);
+        // 🔥 LOG ACTIVITY
+        ActivityLog::record(
+            'Created User',
+            "Admin created new user: {$user->name} ({$user->email}) with role: {$user->role->name}",
+            $user
+        );
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
@@ -67,6 +74,9 @@ class AdminUserController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
+        // 🔥 CAPTURE OLD VALUES
+        $oldEmail = $user->email;
+        $oldRole = $user->role->name;
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -85,6 +95,28 @@ class AdminUserController extends Controller
         }
 
         $user->update($validated);
+        // Reload to get new role name
+        $user->refresh();
+
+        // 🔥 LOG ACTIVITY WITH CHANGES
+        $changes = [];
+        if ($oldEmail !== $user->email) {
+            $changes[] = "Email: {$oldEmail} → {$user->email}";
+        }
+        if ($oldRole !== $user->role->name) {
+            $changes[] = "Role: {$oldRole} → {$user->role->name}";
+        }
+        if ($request->filled('password')) {
+            $changes[] = "Password updated";
+        }
+
+        $changeDescription = !empty($changes) ? " (" . implode(', ', $changes) . ")" : "";
+
+        ActivityLog::record(
+            'Updated User',
+            "Admin updated user: {$user->name}{$changeDescription}",
+            $user
+        );
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
@@ -93,11 +125,25 @@ class AdminUserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-        
+
         // Check if user is trying to delete themselves
         if ($user->id == Auth::id()) {
             return back()->with('error', 'You cannot delete your own account.');
         }
+
+        // 🔥 CAPTURE DATA BEFORE DELETION
+        $userName = $user->name;
+        $userEmail = $user->email;
+        $userRole = $user->role->name;
+
+        // 🔥 LOG BEFORE DELETION
+        ActivityLog::record(
+            'Deleted User',
+            "Admin deleted user: {$userName} ({$userEmail}, Role: {$userRole})",
+            null
+        );
+
+        $user->delete();
 
         $user->delete();
         return back()->with('success', 'User deleted successfully.');
@@ -107,14 +153,24 @@ class AdminUserController extends Controller
     public function toggleStatus($id)
     {
         $user = User::findOrFail($id);
-        
+
         // Security: Prevent Admin from deactivating themselves
-        if($user->hasRole('admin') && $user->id == Auth::id()) {
+        if ($user->hasRole('admin') && $user->id == Auth::id()) {
             return back()->with('error', 'You cannot deactivate your own account.');
         }
 
         $user->is_active = !$user->is_active;
         $user->save();
+
+        // 🔥 LOG ACTIVITY
+        $action = $user->is_active ? 'Activated User' : 'Deactivated User';
+        $status = $user->is_active ? 'Activated' : 'Deactivated';
+
+        ActivityLog::record(
+            $action,
+            "Admin {$status} user: {$user->name} ({$user->email})",
+            $user
+        );
 
         $status = $user->is_active ? 'Activated' : 'Deactivated';
         return back()->with('success', "User account has been {$status}.");

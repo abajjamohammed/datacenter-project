@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use App\Models\AccountRequest;
+use App\Models\ActivityLog;
 
 class AuthController extends Controller
 {
@@ -25,7 +26,15 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            $role = Auth::user()->role->name;
+
+            $user = Auth::user();
+            $role = $user->role->name;
+
+            // 🔥 LOG SUCCESSFUL LOGIN
+            ActivityLog::record(
+                'User Login',
+                "User logged in: {$user->name} ({$user->email}) as {$role}"
+            );
 
             switch ($role) {
                 case 'admin':
@@ -40,6 +49,18 @@ class AuthController extends Controller
                     return redirect()->route('home');
             }
         }
+
+        // 🔥 LOG FAILED LOGIN ATTEMPT
+        ActivityLog::create([
+            'user_id' => null, // No user since login failed
+            'action' => 'Failed Login Attempt',
+            'description' => "Failed login attempt for email: {$request->email}",
+            'model_type' => null,
+            'model_id' => null,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
 
         return back()->withErrors(['email' => 'The provided credentials do not match our records.']);
     }
@@ -73,6 +94,18 @@ class AuthController extends Controller
             'status'        => 'en_attente',
         ]);
 
+        // 🔥 LOG ACCOUNT REQUEST
+        ActivityLog::create([
+            'user_id' => null,
+            'action' => 'Account Request Submitted',
+            'description' => "New account request from: {$request->name} ({$request->email}) - Department: {$request->department}",
+            'model_type' => AccountRequest::class,
+            'model_id' => $newRequest->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
+
         // 2. NOW notify the Admin that someone new applied!
         $admins = \App\Models\User::whereHas('role', function ($q) {
             $q->where('name', 'admin');
@@ -95,6 +128,17 @@ class AuthController extends Controller
     // Added Logout for completeness
     public function logout(Request $request)
     {
+        $user = Auth::user();
+        $userName = $user ? $user->name : 'Unknown';
+        $userEmail = $user ? $user->email : 'Unknown';
+
+        // 🔥 LOG BEFORE LOGOUT
+        ActivityLog::record(
+            'User Logout',
+            "User logged out: {$userName} ({$userEmail})"
+        );
+
+        Auth::logout();
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
