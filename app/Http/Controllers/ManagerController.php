@@ -224,7 +224,7 @@ class ManagerController extends Controller
             })->firstOrFail();
 
         $incident->update([
-            'incident_status' => 'Resolved',
+            'incident_status' => 'résolu',
             'resolved_by' => Auth::id(),
             'resolved_at' => now(),
         ]);
@@ -240,15 +240,6 @@ class ManagerController extends Controller
         return back()->with('success', 'Incident marked as resolved.');
     }
 
-    public function moderation()
-    {
-        $myResourceIds = Auth::user()->managedResources->pluck('id');
-        $alerts = Incident::with(['reporter', 'resource'])
-            ->whereIn('resource_id', $myResourceIds)
-            ->orderBy('created_at', 'desc')
-            ->get();
-        return view('manager.moderation.index', compact('alerts'));
-    }
 
     public function destroyIncident($id)
     {

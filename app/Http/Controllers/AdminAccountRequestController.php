@@ -22,14 +22,13 @@ class AdminAccountRequestController extends Controller
         // If the request specifically asked for 'invité', logic can be adjusted here.
         $role = Role::where('name', 'utilisateur_interne')->first();
 
-        // B. Generate a temporary password
-        $tempPassword = Str::random(10);
+    $finalPassword = $request->password ?? Hash::make('12345678');
 
         // C. Create the real User
         $newUser = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($tempPassword), // Hash the temp password
+            'password' => $finalPassword, 
             'role_id' => $role->id,
             'department' => $request->department,
             'profile' => $request->profile, // e.g. Ingénieur
@@ -50,7 +49,7 @@ class AdminAccountRequestController extends Controller
         $request->delete();
 
         // E. Return with the password so Admin can share it
-        return back()->with('success', "User approved! Temporary Password: " . $tempPassword);
+        return back()->with('success', "User approved! Temporary Password: " . $finalPassword);
     }
 
     // 2. REJECT: Delete the request

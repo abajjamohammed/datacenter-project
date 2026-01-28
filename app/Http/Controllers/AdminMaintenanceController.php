@@ -6,6 +6,7 @@ use App\Models\Maintenance;
 use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AdminMaintenanceController extends Controller
 {
@@ -38,7 +39,8 @@ class AdminMaintenanceController extends Controller
             'description' => 'required|string|max:500',
         ]);
 
-        $maintenance = Maintenance::create([
+        // 1. Create the Maintenance
+        Maintenance::create([
             'resource_id' => $request->resource_id,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
@@ -46,13 +48,18 @@ class AdminMaintenanceController extends Controller
             'created_by' => Auth::id(),
         ]);
 
-        // LOGIC: If the maintenance starts NOW (or in the past) and ends in future, 
-        // automatically set the resource status to 'maintenance'
-        $now = now();
-        if ($request->start_date <= $now && $request->end_date > $now) {
-            $resource = Resource::find($request->resource_id);
+        // 2. Logic to update Resource Status immediately
+    // Use Carbon to handle the "Midnight" problem here too
+    $start = Carbon::parse($request->start_date)->startOfDay();
+    $end   = Carbon::parse($request->end_date)->endOfDay(); // Set to 23:59:59
+    $now   = now();
+
+    if ($start <= $now && $end >= $now) {
+        $resource = Resource::find($request->resource_id);
+        if($resource->resource_status !== 'hors_service') {
             $resource->update(['resource_status' => 'maintenance']);
         }
+    }
 
         return redirect()->route('admin.maintenances.index')->with('success', 'Maintenance scheduled successfully.');
     }
@@ -64,10 +71,12 @@ class AdminMaintenanceController extends Controller
         $resource = $maintenance->resource;
 
         // If this maintenance was currently active, set resource back to available
-        if ($resource->resource_status === 'maintenance' && 
-            now() >= $maintenance->start_date && 
-            now() <= $maintenance->end_date) {
-            
+        if (
+            $resource->resource_status === 'maintenance' &&
+            now() >= $maintenance->start_date &&
+            now() <= $maintenance->end_date
+        ) {
+
             $resource->update(['resource_status' => 'disponible']);
         }
 

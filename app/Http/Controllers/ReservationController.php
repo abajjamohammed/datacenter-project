@@ -105,7 +105,7 @@ class ReservationController extends Controller
             'reservation_status' => 'en_attente',
         ]);
 
-        // 👉 NOTIFY THE MANAGER
+        // NOTIFY THE MANAGER
         Notification::create([
             'user_id' => $reservation->resource->responsable_id, // The person in charge of this specific resource
             'type' => 'reservation_response',

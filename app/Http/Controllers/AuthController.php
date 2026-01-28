@@ -61,23 +61,6 @@ class AuthController extends Controller
             'phone'         => 'nullable|string',
         ]);
 
-        /* --- COMMENTED OUT OLD LOGIC (Creates user immediately) ---
-        $roleInvite = Role::where('name', 'invite')->first();
-        if (!$roleInvite) {
-            return back()->withErrors(['email' => 'Erreur système : Rôle invité introuvable.']);
-        }
-        $user = User::create([
-            'name'       => $request->name,
-            'email'      => $request->email,
-            'password'   => Hash::make($request->password),
-            'role_id'    => $roleInvite->id,
-            'department' => $request->department,
-            'phone'      => $request->phone,
-            'is_active'  => true
-        ]);
-        Auth::login($user);
-        return redirect()->route('guest.dashboard')->with('success', 'Account created successfully!');
-        ------------------------------------------------------------- */
 
         // 2. NEW LOGIC: Save to account_requests table
         $newRequest = AccountRequest::create([

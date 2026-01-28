@@ -9,7 +9,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\GuestController;
-// Admin Controllers (Your Work)
+// Admin Controllers 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminResourceController;
 use App\Http\Controllers\AdminUserController;
@@ -17,11 +17,11 @@ use App\Http\Controllers\AdminMaintenanceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AdminLogController;
 use App\Http\Controllers\AdminAccountRequestController;
-// Manager & User Controllers (Remote Work)
+// Manager & User Controllers 
 use App\Http\Controllers\ManagerController;
-use App\Http\Controllers\UserDashboardController; // Ensure this exists from pull
-use App\Http\Controllers\UserIncidentController; // Ensure this exists from pull
-//use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserDashboardController; 
+use App\Http\Controllers\UserIncidentController; 
+
 
 // 1. PUBLIC ROUTES
 Route::get('/', function () {
@@ -45,22 +45,16 @@ Route::prefix('guest')->group(function () {
     // Dashboard (Required for Login Redirection)
     Route::get('/dashboard', function () {
         return view('Guest.dashboard');
-    })->name('guest.dashboard');
+    })->name('guest.dashboard');  
 
-    // Other logged-in guest features 
-    Route::get('/resources', [GuestController::class, 'index'])->name('guest.resources');
 });
 
-// Common Tools: Search & Catalog 
 // mohamed: moved this from the middleware to outside here, because everyone can access it we dont have to securise it by the middleware
 Route::get('/catalog', [ResourceController::class, 'index'])->name('catalog.index');
 
 
 // Authentication Forms
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
+Route::get('/login', function () {return view('auth.login');})->name('login');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 
@@ -70,8 +64,6 @@ Route::post('/register-request', [AuthController::class, 'register'])->name('gue
 
 
 // Authentication Logic
-//Route::post('/login', [AuthController::class, 'login']);
-//Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -80,19 +72,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/usage-policies', [AuthController::class, 'showPolicies'])->name('policies.show');
 
 
-// 2. PROTECTED ROUTES (Require Login)
+
+
+// PROTECTED ROUTES (Require Login)
 Route::middleware(['auth'])->group(function () {
 
     // Notification Routes
     Route::get('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
     Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 
-    // --- B. ROLE: UTILISATEUR INTERNE ---  
+    //  ROLE: UTILISATEUR INTERNE --------------------------
     Route::prefix('my')->middleware(['role:utilisateur_interne'])->group(function () {  // changed from prefix user to prefix my  :mohammed 06/01
-        // Dashboard (Required for Login Redirection)
-        //   Route::get('/dashboard', function () {
-        //       return view('user.dashboard');
-        //   })->name('user.dashboard');
+        // DASHBOARD
         Route::get('/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index'])->name('user.dashboard');
 
         // See all my reservations  :mohammed 08/01
@@ -108,13 +99,13 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
 
         //INCIDENTS: Report a technical issue
-        Route::get('/incidents/report', [\App\Http\Controllers\UserIncidentController::class, 'create'])->name('incidents.create');
-        Route::post('/incidents', [\App\Http\Controllers\UserIncidentController::class, 'store'])->name('incidents.store');
+        Route::get('/incidents/report', [UserIncidentController::class, 'create'])->name('incidents.create');
+        Route::post('/incidents', [UserIncidentController::class, 'store'])->name('incidents.store');
     });
 
 
 
-
+// --- B. ROLE: RESPONSABLE TECHNIQUE (Manager) ---------------------------
     Route::prefix('manager')->middleware(['role:responsable_technique'])->group(function () {
         // Dashboard
         Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard');
@@ -135,9 +126,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/incidents', [ManagerController::class, 'incidents'])->name('manager.incidents.index');
         Route::post('/incidents/{id}/resolve', [ManagerController::class, 'resolveIncident'])->name('manager.incidents.resolve');
 
-        // Moderation
-        Route::get('/moderation', [ManagerController::class, 'moderation'])->name('manager.moderation.index');
-        Route::delete('/moderation/incident/{id}', [ManagerController::class, 'destroyIncident'])->name('manager.moderation.delete');
+  
     });
 
 
@@ -170,12 +159,3 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-// Activity Logs Placeholder (From Remote)
-Route::get('/activity-logs', function () {
-    return "Activity Logs Page - Coming Soon";
-})->name('activity.logs');
-
-// Testing
-Route::get('/test-all-roles', function () {
-    // ... your existing testing code ...
-});

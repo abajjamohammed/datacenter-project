@@ -2,38 +2,11 @@
 
 @section('title', 'Manage Resources')
 
+
 @section('styles')
-<style>
-    .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    
-    table { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
-    th { padding: 15px; text-align: left; color: #7f8c8d; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; border-bottom: 2px solid #eee; }
-    td { padding: 15px; background: white; border-top: 1px solid #f1f1f1; border-bottom: 1px solid #f1f1f1; }
-    
-    /* Category Badges */
-    .cat-badge { padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
-    .cat-server { background: #e8f6f3; color: #1abc9c; }
-    .cat-vm { background: #eaf2f8; color: #3498db; }
-    .cat-storage { background: #fef9e7; color: #f1c40f; }
-    .cat-network { background: #fdedec; color: #e74c3c; }
-
-    /* Action Buttons */
-    .btn-icon { width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; margin-right: 5px; }
-    .btn-edit { background: #ebf5fb; color: #3498db; }
-    .btn-edit:hover { background: #3498db; color: white; }
-    
-    /* Toggle Switch Logic */
-    .btn-power-on { background: #e8f8f5; color: #27ae60; }
-    .btn-power-on:hover { background: #fdedec; color: #e74c3c; } /* Hover turns red to show 'turn off' */
-    
-    .btn-power-off { background: #fdedec; color: #e74c3c; }
-    .btn-power-off:hover { background: #e8f8f5; color: #27ae60; } /* Hover turns green to show 'turn on' */
-
-    .btn-delete { background: white; color: #bdc3c7; }
-    .btn-delete:hover { color: #e74c3c; }
-</style>
+    <link rel="stylesheet" href="{{ asset('admin.css') }}">
 @endsection
+
 
 @section('content')
 <div class="header-controls">
@@ -94,14 +67,32 @@
                 <td style="color: #555; font-size: 0.9rem;">
                     <i class="fas fa-map-marker-alt" style="color: #ccc;"></i> {{ $resource->location }}
                 </td>
-                <td>
-                    @if($resource->is_active)
-                        <span style="color: #27ae60; font-size: 0.85rem; font-weight: bold; background: #e8f8f5; padding: 4px 8px; border-radius: 4px;">
-                            Active
-                        </span>
-                    @else
+           <td>
+                    {{-- 1. Check if resource is completely disabled --}}
+                    @if(!$resource->is_active)
                         <span style="color: #e74c3c; font-size: 0.85rem; font-weight: bold; background: #fdedec; padding: 4px 8px; border-radius: 4px;">
                             Disabled
+                        </span>
+                    
+                    {{-- 2. Check specific status (Maintenance, Reserved, etc.) --}}
+                    @elseif($resource->resource_status === 'maintenance')
+                        <span style="color: #d35400; font-size: 0.85rem; font-weight: bold; background: #fdebd0; padding: 4px 8px; border-radius: 4px;">
+                            <i class="fas fa-tools"></i> Maintenance
+                        </span>
+
+                    @elseif($resource->resource_status === 'réservée')
+                        <span style="color: #2980b9; font-size: 0.85rem; font-weight: bold; background: #ebf5fb; padding: 4px 8px; border-radius: 4px;">
+                            Reserved
+                        </span>
+
+                    @elseif($resource->resource_status === 'hors_service')
+                        <span style="color: #c0392b; font-size: 0.85rem; font-weight: bold; background: #fadbd8; padding: 4px 8px; border-radius: 4px;">
+                            Broken
+                        </span>
+
+                    @else
+                        <span style="color: #27ae60; font-size: 0.85rem; font-weight: bold; background: #e8f8f5; padding: 4px 8px; border-radius: 4px;">
+                            Available
                         </span>
                     @endif
                 </td>

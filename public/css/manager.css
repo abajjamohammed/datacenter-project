@@ -145,3 +145,43 @@ table {
     /* 10px vertical space between rows */
     border-collapse: separate;
 }
+
+/* Specific tweaks for this page */
+.manager-resources {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Modal Centering Fix */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 9999;
+    align-items: center;
+    /* Center Vertically */
+    justify-content: center;
+    /* Center Horizontally */
+}
+
+.modal-box {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    /* Reset margins since we use flex centering */
+    margin: 0;
+}
+
+/* Make the modal display flex when active */
+.modal-overlay[style*="display: block"] {
+    display: flex !important;
+}

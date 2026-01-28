@@ -6,6 +6,7 @@
     <title>Registration Form</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     <link rel="stylesheet" href="{{ asset('css/password.css') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
     <script src="{{ asset('js/password.js') }}"></script>
 </head>
 <body class="auth-page"> 

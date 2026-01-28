@@ -8,6 +8,7 @@ use App\Models\Resource;
 use App\Models\Reservation;
 use App\Models\AccountRequest;
 use App\Models\ResourceCategory; // Added Import
+use App\Models\Maintenance;
 
 class AdminController extends Controller
 {
@@ -30,7 +31,7 @@ class AdminController extends Controller
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now())
             ->count();
-            
+
         // Calculate percentage (avoid division by zero)
         $occupancy_rate = $total_resources > 0 ? round(($occupied_count / $total_resources) * 100) : 0;
 
@@ -38,40 +39,59 @@ class AdminController extends Controller
         // We need the category name and the count of resources in it for the bar charts
         $categories_breakdown = ResourceCategory::withCount('resources')->get();
 
-        // 4. INFRASTRUCTURE HEALTH (Status Breakdown)
-        // Groups resources by their current status (Available vs Maintenance vs Out of Order)
+
+        // 4. INFRASTRUCTURE HEALTH 
+        // FIX: Use 'whereDate' to include the entire day, regardless of time
+        $active_maintenances = Maintenance::whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->distinct() // Fix syntax slightly
+            ->pluck('resource_id') // Get IDs to be accurate
+            ->count();
+
+        // Count resources explicitly marked as 'hors_service' (Broken)
+        $broken = Resource::where('resource_status', 'hors_service')->count();
+
+        // Count resources currently occupied (active reservations)
+        // We use queries to be accurate, not just the status column
+        $reserved = Reservation::where('reservation_status', 'active')
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->count();
+
+        // Calculate Available: Total - (Maintenance + Broken + Reserved)
+        $available = $total_resources - ($active_maintenances + $broken + $reserved);
+
         $status_breakdown = [
-            'disponible' => Resource::where('resource_status', 'disponible')->count(),
-            'maintenance' => Resource::where('resource_status', 'maintenance')->count(),
-            'hors_service' => Resource::where('resource_status', 'hors_service')->count(),
-            // Optional: Count 'Reserved' specifically if you treat it as a status distinct from 'Active Reservation'
-            'réservée'     => Resource::where('resource_status', 'réservée')->count(), 
+            'disponible'   => max(0, $available),
+            'maintenance'  => $active_maintenances,
+            'hors_service' => $broken,
+            'réservée'     => $reserved,
         ];
 
         // 5. TOP ACTIVE USERS (Who has the most approved reservations?)
         // Useful for seeing who consumes the most resources
-        $top_active_users = User::withCount(['reservations' => function($q) {
+        $top_active_users = User::withCount(['reservations' => function ($q) {
             $q->where('reservation_status', 'approuvée')
-              ->orWhere('reservation_status', 'active');
+                ->orWhere('reservation_status', 'active');
         }])
-        ->orderBy('reservations_count', 'desc')
-        ->take(4) // Get Top 4
-        ->get();
+            ->orderBy('reservations_count', 'desc')
+            ->take(4) // Get Top 4
+            ->get();
 
         // 6. Recent Account Requests (Keep existing logic)
         $account_requests = AccountRequest::where('status', 'en_attente')->get();
-        
+
         // 7. Recent Users (Keep existing logic)
         $recent_users = User::with('role')->latest()->take(5)->get();
 
         // Pass ALL data to the view
         return view('admin.dashboard', compact(
-            'stats', 
-            'occupancy_rate', 
-            'categories_breakdown', 
-            'status_breakdown', 
+            'stats',
+            'occupancy_rate',
+            'categories_breakdown',
+            'status_breakdown',
             'top_active_users',
-            'account_requests', 
+            'account_requests',
             'recent_users'
         ));
     }
@@ -80,12 +100,12 @@ class AdminController extends Controller
     public function toggleUserStatus($id)
     {
         $user = User::findOrFail($id);
-        
+
         // Prevent admin from banning themselves
-        if($user->hasRole('admin')) {
+        if ($user->hasRole('admin')) {
             return back()->with('error', 'Cannot ban an admin.');
         }
-        
+
         $user->is_active = !$user->is_active;
         $user->save();
 

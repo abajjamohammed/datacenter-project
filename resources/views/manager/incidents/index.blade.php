@@ -23,7 +23,7 @@
             <td>{{ $inc->resource->name }}</td>
             <td><strong>{{ $inc->title }}</strong>: {{ $inc->description }}</td>
             <td>
-                @if($inc->incident_status != 'Resolved')
+                @if($inc->incident_status != 'résolu')
                 <form action="{{ route('manager.incidents.resolve', $inc->id) }}" method="POST">
                     @csrf <button class="btn-primary-small btn-green">Mark Resolved</button>
                 </form>

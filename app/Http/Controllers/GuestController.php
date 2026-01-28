@@ -5,14 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Resource;
 use App\Models\AccountRequest; // We need this model to save requests
+use Illuminate\Support\Facades\Hash;
 
 class GuestController extends Controller
 {
-    // 1. Existing function for the guest dashboard/resources
-    public function index() {
-        $resources = Resource::all(); 
-        return view('Guest.resources', compact('resources'));
-    }
+
 
     // 2. MISSING FUNCTION 1: Show the form
     // This fixes the error in your screenshot
@@ -35,6 +32,7 @@ class GuestController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'department' => $validated['department'],
+            'password' => Hash::make($validated['password']),
             'justification' => $validated['justification'],
             'status' => 'En attente', // Pending
         ]);

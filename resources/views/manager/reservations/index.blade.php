@@ -23,21 +23,22 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($reservations as $res)
-                    {{-- LOGIC: Normalize the status to handle 'En attente', 'EN_ATTENTE', etc. --}}
+  @foreach ($reservations as $res)
+                    {{-- LOGIC: Check if it is PENDING --}}
                     @php
-                        $status = strtoupper(trim($res->reservation_status));
-                        $isFinished =
-                            $status === 'APPROUVÉE' ||
-                            $status === 'REFUSÉE' ||
-                            $status === 'APPROVED' ||
-                            $status === 'REJECTED';
+                        // Convert to uppercase and remove spaces
+                        $rawStatus = strtoupper(trim($res->reservation_status));
+                        
+                        // We check if it is explicitly waiting. Everything else is considered processed.
+                        $isPending = $rawStatus === 'EN_ATTENTE' || $rawStatus === 'PENDING';
                     @endphp
 
                     <tr>
                         <td>
-                            <span
-                                class="status-badge {{ !$isFinished ? 'maintenance' : ($status === 'REFUSÉE' ? 'occupied' : 'available') }}">
+                            {{-- Badge Logic: Yellow if pending, Green if Approved, Red if Rejected --}}
+                            <span class="status-badge 
+                                {{ $isPending ? 'maintenance' : 
+                                   ($rawStatus === 'REFUSÉE' || $rawStatus === 'REJECTED' ? 'occupied' : 'available') }}">
                                 {{ $res->reservation_status }}
                             </span>
                         </td>
@@ -45,8 +46,8 @@
                         <td>{{ $res->resource->name }}</td>
                         <td>{{ $res->justification }}</td>
                         <td>
-                            {{-- IF NOT FINISHED, SHOW BUTTONS --}}
-                            @if (!$isFinished)
+                            {{-- LOGIC: Only show buttons if it is PENDING --}}
+                            @if ($isPending)
                                 <div style="display: flex; gap: 5px;">
                                     {{-- Approve Button --}}
                                     <button
@@ -62,7 +63,10 @@
                                     </button>
                                 </div>
                             @else
-                                <span style="color: gray;">Processed</span>
+                                {{-- If not pending (Approved/Rejected/Terminated), show text --}}
+                                <span style="color: gray; font-weight: bold; font-size: 0.9em;">
+                                    <i class="fas fa-check-circle"></i> Processed
+                                </span>
                             @endif
                         </td>
                     </tr>

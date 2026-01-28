@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 
+    <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
+
     {{-- Individual Page Styles --}}
     @yield('styles')
 
@@ -80,16 +82,18 @@ if (Auth::check()) {
                         @endif
                     </ul>
                 </div>
-                @if (Auth::check())
+    
                     <div class="nav-group">
+                        @if (Auth::check() && Auth::user()->role->name !== 'admin')
                         <span class="nav-label">RESERVATIONS</span>
+                        @endif
                         <ul>
                             @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
                                 {{--  <li><a href="#">My Requests</a></li> --}}
                                 <li><a href="{{ route('reservations.index') }}"
                                         class="{{ Request::routeIs('reservations.index') ? 'active' : '' }}">Reservation
                                         History</a></li>
-                            @elseif (Auth::check() && Auth::user()->role->name === 'invite')
+                            @elseif (!Auth::check() || (Auth::check() && Auth::user()->role->name === 'invite'))
                                 {{-- Specific style for Guests to Apply for Access --}}
                                 <li>
                                     <a href="{{ route('auth.register') }}"
@@ -109,7 +113,7 @@ if (Auth::check()) {
                             @endif
                         </ul>
                     </div>
-                @endif
+             
 
                 {{-- ADMIN SECTION --}}
                 @if (Auth::check() && Auth::user()->role?->name === 'admin')
@@ -194,13 +198,6 @@ if (Auth::check()) {
                 </div>
 
                 <div class="header-right">
-                    {{-- Quick Action for Users --}}
-                    @if (Auth::check() && Auth::user()->role->name === 'utilisateur_interne')
-                        <a href="{{ route('catalog.index') }}" class="btn-primary-small"
-                            style="text-decoration:none;">+
-                            New Request</a>
-                    @endif
-
                     {{-- Admin Quick Action --}}
                     @if (Auth::check() && Auth::user()->role->name === 'admin')
                         <a href="{{ route('admin.resources.create') }}" class="btn-primary-small"

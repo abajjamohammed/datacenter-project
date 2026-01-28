@@ -1,23 +1,10 @@
 @extends('layouts.app')
 
 @section('title', 'Maintenance Schedule')
-
 @section('styles')
-<style>
-    .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-    th { background: #f8f9fa; color: #555; text-transform: uppercase; font-size: 0.85rem; }
-    
-    .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
-    .status-active { background: #fdedec; color: #e74c3c; animation: pulse 2s infinite; }
-    .status-future { background: #ebf5fb; color: #3498db; }
-    .status-past { background: #f2f4f6; color: #95a5a6; }
-
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-</style>
+    <link rel="stylesheet" href="{{ asset('admin.css') }}">
 @endsection
+
 
 @section('content')
 <div class="header-controls">
