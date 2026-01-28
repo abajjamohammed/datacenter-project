@@ -4,7 +4,7 @@
 @section('styles')
     <link rel="stylesheet" href="{{ asset('css/manager.css') }}">
 
-  
+
 @endsection
 
 @section('content')
@@ -72,14 +72,25 @@
                             </td>
                             <td style="padding: 15px; text-align: right;">
                                 <div class="flex-gap-5" style="justify-content: flex-end;">
-                                    {{-- Maintenance Toggle --}}
-                                    <form action="{{ route('manager.resources.maintenance', $resource->id) }}"
-                                        method="POST">
-                                        @csrf
-                                        <button class="btn-primary-small btn-amber btn-tiny" title="Toggle Maintenance">
+                                    {{-- Maintenance Logic --}}
+                                    @if ($resource->resource_status == 'maintenance')
+                                        {{-- Button to END maintenance --}}
+                                        <form action="{{ route('manager.resources.maintenance', $resource->id) }}"
+                                            method="POST" style="display:inline;">
+                                            @csrf
+                                            <button class="btn-primary-small btn-tiny" style="background-color: #10b981;"
+                                                title="Complete Maintenance">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        {{-- Button to START maintenance (Triggers Modal) --}}
+                                        <button
+                                            onclick="document.getElementById('maint-modal-{{ $resource->id }}').style.display='block'"
+                                            class="btn-primary-small btn-amber btn-tiny" title="Start Maintenance">
                                             <i class="fas fa-tools"></i>
                                         </button>
-                                    </form>
+                                    @endif
 
                                     {{-- Edit --}}
                                     <button
@@ -101,6 +112,43 @@
                                 </div>
                             </td>
                         </tr>
+
+                        <div id="maint-modal-{{ $resource->id }}" class="modal-overlay">
+                            <div class="modal-box">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                    <h3 style="margin: 0;">Set Maintenance Schedule</h3>
+                                    <button
+                                        onclick="document.getElementById('maint-modal-{{ $resource->id }}').style.display='none'"
+                                        style="background:none; border:none; font-size: 1.2rem; cursor: pointer;">&times;</button>
+                                </div>
+
+                                <form action="{{ route('manager.resources.maintenance', $resource->id) }}" method="POST">
+                                    @csrf
+                                    <div style="margin-bottom: 15px;">
+                                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Maintenance End
+                                            Date</label>
+                                        <input type="datetime-local" name="end_date" required class="form-input-full"
+                                            style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                    </div>
+
+                                    <div style="margin-bottom: 20px;">
+                                        <label
+                                            style="display: block; margin-bottom: 5px; font-weight: 600;">Description</label>
+                                        <textarea name="description" class="form-textarea-full" rows="3" required
+                                            style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">Routine maintenance.</textarea>
+                                    </div>
+
+                                    <div style="text-align: right;">
+                                        <button type="button"
+                                            onclick="document.getElementById('maint-modal-{{ $resource->id }}').style.display='none'"
+                                            style="margin-right: 10px; padding: 8px 15px; background: #e2e8f0; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                                        <button type="submit" class="btn-primary-small btn-amber">Confirm
+                                            Maintenance</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
 
                         <!-- Edit Modal -->
                         <div id="edit-modal-{{ $resource->id }}" class="modal-overlay">

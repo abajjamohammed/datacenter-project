@@ -101,17 +101,30 @@ class ManagerController extends Controller
         $resource = Resource::where('id', $id)->where('responsable_id', Auth::id())->firstOrFail();
 
         if ($resource->resource_status === 'maintenance') {
+            // Turning maintenance OFF
             $resource->update(['resource_status' => 'disponible']);
+            $message = 'Resource is now available.';
         } else {
+            // Turning maintenance ON - Requires validation because DB is NOT NULL
+            $request->validate([
+                'end_date' => 'required|date|after:now',
+                'description' => 'required|string'
+            ]);
+
             $resource->update(['resource_status' => 'maintenance']);
+
             Maintenance::create([
                 'resource_id' => $resource->id,
-                'description' => 'Maintenance initiated by manager',
-                'start_date' => now(),
-                'created_by' => Auth::id(),
+                'description' => $request->description,
+                'start_date'  => now(),
+                'end_date'    => $request->end_date, // Now correctly passed from form
+                'created_by'  => Auth::id(),
             ]);
+
+            $message = 'Maintenance scheduled successfully.';
         }
-        return back()->with('success', 'Resource status updated.');
+
+        return back()->with('success', $message);
     }
 
     // --- RESERVATION MANAGEMENT ---
